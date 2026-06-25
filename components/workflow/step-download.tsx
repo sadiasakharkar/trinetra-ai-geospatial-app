@@ -1,0 +1,204 @@
+"use client"
+
+import { useState } from "react"
+import {
+  Download,
+  FileText,
+  FileJson,
+  Map,
+  Image as ImageIcon,
+  Loader2,
+  CheckCircle2,
+  PackageCheck,
+  RotateCcw,
+  PartyPopper,
+} from "lucide-react"
+import { cn } from "@/lib/utils"
+import { DOWNLOADS, buildMetricsJson, delay, type DownloadArtifact } from "@/lib/mock"
+import { useWorkflow } from "./workflow-context"
+import { StepHeader, StepCard } from "./step-shell"
+import { Badge } from "@/components/dashboard/ui"
+
+const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  GeoTIFF: Map,
+  GeoJSON: Map,
+  JSON: FileJson,
+  PDF: FileText,
+  "PNG (RGB)": ImageIcon,
+}
+
+function triggerBrowserDownload(name: string, content: string) {
+  const blob = new Blob([content], { type: "application/octet-stream" })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = name
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
+export function StepDownload() {
+  const { downloaded, markDownloaded, back, goTo } = useWorkflow()
+  const [pending, setPending] = useState<string | null>(null)
+
+  const handleDownload = async (a: DownloadArtifact) => {
+    setPending(a.id)
+    await delay(900)
+    // produce a real, tiny file so the click actually downloads something
+    const content =
+      a.type === "JSON"
+        ? buildMetricsJson()
+        : `TRINETRA-AI mock artifact\n${a.name}\nType: ${a.type}\nSize (reported): ${a.size}\n${a.desc}\nGenerated: ${new Date().toISOString()}\n`
+    triggerBrowserDownload(a.name, content)
+    markDownloaded(a.id)
+    setPending(null)
+  }
+
+  const handleDownloadAll = async () => {
+    for (const a of DOWNLOADS) {
+      if (!downloaded.includes(a.id)) {
+        // eslint-disable-next-line no-await-in-loop
+        await handleDownload(a)
+      }
+    }
+  }
+
+  const allDone = downloaded.length === DOWNLOADS.length
+
+  return (
+    <div>
+      <StepHeader
+        eyebrow="Step 6 of 6"
+        title="Download Outputs"
+        description="Export the reconstructed scene and supporting artifacts. Files are generated as lightweight demo bundles you can actually download."
+        icon={<PackageCheck className="size-5 text-primary" aria-hidden="true" />}
+      />
+
+      <StepCard>
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">
+              Reconstruction Artifacts
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              {downloaded.length} of {DOWNLOADS.length} exported
+            </p>
+          </div>
+          <button
+            onClick={handleDownloadAll}
+            disabled={allDone || pending !== null}
+            className="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Download className="size-4" />
+            {allDone ? "All Downloaded" : "Download All"}
+          </button>
+        </div>
+
+        <ul className="flex flex-col gap-2">
+          {DOWNLOADS.map((a) => {
+            const Icon = ICONS[a.type] ?? FileText
+            const isDone = downloaded.includes(a.id)
+            const isPending = pending === a.id
+            return (
+              <li
+                key={a.id}
+                className="flex items-center gap-3 rounded-xl border border-border bg-secondary/20 p-3"
+              >
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/12 text-primary">
+                  <Icon className="size-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="truncate font-mono text-sm text-foreground">
+                      {a.name}
+                    </p>
+                    <Badge tone="muted">{a.type}</Badge>
+                  </div>
+                  <p className="truncate text-[11px] text-muted-foreground">
+                    {a.desc} · {a.size}
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleDownload(a)}
+                  disabled={isPending}
+                  className={cn(
+                    "flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors",
+                    isDone
+                      ? "border-chart-3/40 bg-chart-3/10 text-chart-3"
+                      : "border-border bg-secondary/40 text-foreground hover:bg-secondary",
+                  )}
+                >
+                  {isPending ? (
+                    <>
+                      <Loader2 className="size-3.5 animate-spin" /> Preparing
+                    </>
+                  ) : isDone ? (
+                    <>
+                      <CheckCircle2 className="size-3.5" /> Downloaded
+                    </>
+                  ) : (
+                    <>
+                      <Download className="size-3.5" /> Download
+                    </>
+                  )}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      </StepCard>
+
+      {/* Completion banner */}
+      <StepCard
+        className={cn(
+          "mt-4 transition-colors",
+          allDone ? "border-chart-3/40 bg-chart-3/8" : "",
+        )}
+      >
+        <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+          <div
+            className={cn(
+              "flex size-12 shrink-0 items-center justify-center rounded-xl",
+              allDone ? "bg-chart-3/20 text-chart-3" : "bg-primary/15 text-primary",
+            )}
+          >
+            {allDone ? (
+              <PartyPopper className="size-6" />
+            ) : (
+              <PackageCheck className="size-6" />
+            )}
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-foreground">
+              {allDone
+                ? "Workflow complete — all outputs exported"
+                : "Reconstruction pipeline finished"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {allDone
+                ? "The full TRINETRA-AI cloud-removal workflow ran end to end. Start a new scene to run it again."
+                : "Export the artifacts above, or revisit any earlier step from the workflow bar."}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={back}
+              className="flex items-center gap-2 rounded-lg border border-border bg-secondary/40 px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+            >
+              Back
+            </button>
+            <button
+              onClick={() => goTo("upload")}
+              className="flex items-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
+            >
+              <RotateCcw className="size-4" />
+              New Scene
+            </button>
+          </div>
+        </div>
+      </StepCard>
+    </div>
+  )
+}
