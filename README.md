@@ -1,9 +1,5 @@
 # trinetra-ai-geospatial-app
 
-## Built with v0
-
-
-
 ## Getting Started
 
 First, run the development server:
