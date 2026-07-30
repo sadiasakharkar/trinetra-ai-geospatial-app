@@ -17,12 +17,13 @@ import { Badge, MetricCard } from "@/components/dashboard/ui"
 type ViewMode = "slider" | "side" | "confidence"
 
 export function StepCompare() {
-  const { dataset, next, back } = useWorkflow()
+  const { dataset, reconResult, next, back } = useWorkflow()
   const [mode, setMode] = useState<ViewMode>("slider")
   const [split, setSplit] = useState(50)
 
   const cloudy = dataset?.thumb ?? "/images/liss-iv-cloudy.png"
-  const clear = dataset?.reconstructed ?? "/images/liss-iv-reconstructed.png"
+  const clear = reconResult?.output_paths?.reconstructed ?? dataset?.reconstructed ?? "/images/liss-iv-reconstructed.png"
+  const confidence = reconResult?.output_paths?.confidence
 
   return (
     <div>
@@ -150,13 +151,24 @@ export function StepCompare() {
 
             {mode === "confidence" ? (
               <>
-                <div
-                  className="pointer-events-none absolute inset-0 mix-blend-screen"
-                  style={{
-                    background:
-                      "radial-gradient(circle at 30% 35%, rgba(255,180,40,0.55), transparent 40%), radial-gradient(circle at 70% 60%, rgba(255,90,70,0.5), transparent 35%), radial-gradient(circle at 50% 80%, rgba(40,220,180,0.4), transparent 45%)",
-                  }}
-                />
+                {confidence ? (
+                  <div className="pointer-events-none absolute inset-0 opacity-60 mix-blend-screen">
+                    <Image
+                      src={confidence}
+                      alt="Confidence Heatmap"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div
+                    className="pointer-events-none absolute inset-0 mix-blend-screen"
+                    style={{
+                      background:
+                        "radial-gradient(circle at 30% 35%, rgba(255,180,40,0.55), transparent 40%), radial-gradient(circle at 70% 60%, rgba(255,90,70,0.5), transparent 35%), radial-gradient(circle at 50% 80%, rgba(40,220,180,0.4), transparent 45%)",
+                    }}
+                  />
+                )}
                 <div className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-2 rounded-md bg-black/60 px-2.5 py-1.5 backdrop-blur-sm">
                   <Eye className="size-3.5 text-primary" />
                   <span className="text-[10px] text-foreground">

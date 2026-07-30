@@ -19,7 +19,9 @@ import { Badge, ProgressBar } from "@/components/dashboard/ui"
 export function StepUpload() {
   const {
     dataset,
-    simulateUpload,
+    selectDataset,
+    uploadFile,
+    availableDatasets,
     uploading,
     uploadProgress,
     next,
@@ -39,32 +41,38 @@ export function StepUpload() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {/* Drop zone */}
         <StepCard className="lg:col-span-1">
-          <label
-            htmlFor="mock-file"
-            className="flex h-full min-h-48 cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border bg-secondary/20 p-6 text-center transition-colors hover:border-primary/50 hover:bg-secondary/40"
-            onClick={(e) => {
-              e.preventDefault()
-              // Simulate picking the first sample on manual upload
-              simulateUpload(DATASETS[0])
+          <input
+            type="file"
+            id="real-file-upload"
+            accept="image/*,.tif,.tiff"
+            className="hidden"
+            onChange={(e) => {
+              if (e.target.files && e.target.files[0]) {
+                uploadFile(e.target.files[0])
+              }
             }}
+          />
+          <label
+            htmlFor="real-file-upload"
+            className="flex h-full min-h-48 cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border bg-secondary/20 p-6 text-center transition-colors hover:border-primary/50 hover:bg-secondary/40"
           >
             <div className="flex size-12 items-center justify-center rounded-full bg-primary/15 ring-1 ring-primary/30">
               <UploadCloud className="size-6 text-primary" />
             </div>
             <div>
               <p className="text-sm font-medium text-foreground">
-                Drop GeoTIFF bundle here
+                Drop GeoTIFF / Image here
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                or click to browse · .tif, .zip up to 2 GB
+                or click to browse · .tif, .png, .jpg up to 2 GB
               </p>
             </div>
             <span className="rounded-md bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary">
-              Use Sample Scene
+              Upload Custom Image
             </span>
           </label>
           <p className="mt-3 text-center text-[11px] text-muted-foreground">
-            Demo mode · uploads are simulated against the sample archive
+            FastAPI mode · Custom files are processed by local PyTorch fusion model
           </p>
         </StepCard>
 
@@ -72,19 +80,19 @@ export function StepUpload() {
         <div className="lg:col-span-2">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-foreground">
-              Sample Archive
+              Sample & Uploaded Archive
             </h2>
             <span className="text-xs text-muted-foreground">
-              {DATASETS.length} scenes available
+              {availableDatasets.length} scenes available
             </span>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {DATASETS.map((d) => {
+            {availableDatasets.map((d) => {
               const selected = dataset?.id === d.id
               return (
                 <button
                   key={d.id}
-                  onClick={() => simulateUpload(d)}
+                  onClick={() => selectDataset(d)}
                   className={cn(
                     "group flex flex-col overflow-hidden rounded-xl border text-left transition-all",
                     selected

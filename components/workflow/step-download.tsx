@@ -40,20 +40,48 @@ function triggerBrowserDownload(name: string, content: string) {
 }
 
 export function StepDownload() {
-  const { downloaded, markDownloaded, back, goTo } = useWorkflow()
+  const { jobId, downloaded, markDownloaded, back, goTo } = useWorkflow()
   const [pending, setPending] = useState<string | null>(null)
 
   const handleDownload = async (a: DownloadArtifact) => {
     setPending(a.id)
-    await delay(900)
-    // produce a real, tiny file so the click actually downloads something
-    const content =
-      a.type === "JSON"
-        ? buildMetricsJson()
-        : `TRINETRA-AI mock artifact\n${a.name}\nType: ${a.type}\nSize (reported): ${a.size}\n${a.desc}\nGenerated: ${new Date().toISOString()}\n`
-    triggerBrowserDownload(a.name, content)
-    markDownloaded(a.id)
-    setPending(null)
+    if (jobId) {
+      try {
+        const res = await fetch(`/api/download/${jobId}/${a.id}`)
+        if (!res.ok) throw new Error("Artifact download failed")
+        const blob = await res.blob()
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement("a")
+        link.href = url
+        link.download = a.name
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+        markDownloaded(a.id)
+      } catch (err) {
+        console.error("Backend download error, using fallback mock download:", err)
+        await delay(500)
+        const content =
+          a.type === "JSON"
+            ? buildMetricsJson()
+            : `TRINETRA-AI mock fallback\n${a.name}\nGenerated: ${new Date().toISOString()}`
+        triggerBrowserDownload(a.name, content)
+        markDownloaded(a.id)
+      } finally {
+        setPending(null)
+      }
+    } else {
+      await delay(900)
+      // produce a real, tiny file so the click actually downloads something
+      const content =
+        a.type === "JSON"
+          ? buildMetricsJson()
+          : `TRINETRA-AI mock artifact\n${a.name}\nType: ${a.type}\nSize (reported): ${a.size}\n${a.desc}\nGenerated: ${new Date().toISOString()}\n`
+      triggerBrowserDownload(a.name, content)
+      markDownloaded(a.id)
+      setPending(null)
+    }
   }
 
   const handleDownloadAll = async () => {

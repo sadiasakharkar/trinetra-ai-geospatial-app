@@ -35,7 +35,7 @@ export const STEPS: { id: StepId; label: string; short: string }[] = [
 ]
 
 export type LogEntry = { level: "info" | "ok" | "warn"; text: string; time: string }
-export type JobStatus = "idle" | "running" | "paused" | "complete"
+export type JobStatus = "idle" | "running" | "paused" | "complete" | "failed"
 
 type WorkflowState = {
   // navigation
@@ -52,6 +52,8 @@ type WorkflowState = {
   uploading: boolean
   uploadProgress: number
   simulateUpload: (d: Dataset) => void
+  uploadFile: (file: File) => Promise<void>
+  availableDatasets: Dataset[]
 
   // config
   config: ReconConfig
@@ -64,6 +66,8 @@ type WorkflowState = {
   startJob: () => void
   pauseJob: () => void
   resetJob: () => void
+  jobId: string | null
+  reconResult: any | null
 
   // downloads
   downloaded: string[]
@@ -86,6 +90,7 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
   const [step, setStep] = useState<StepId>("upload")
   const [furthest, setFurthest] = useState(0)
 
+  const [availableDatasets, setAvailableDatasets] = useState<Dataset[]>(DATASETS)
   const [dataset, setDataset] = useState<Dataset | null>(null)
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
@@ -95,6 +100,8 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<JobStatus>("idle")
   const [progress, setProgress] = useState(0)
   const [logs, setLogs] = useState<LogEntry[]>([])
+  const [jobId, setJobId] = useState<string | null>(null)
+  const [reconResult, setReconResult] = useState<any | null>(null)
 
   const [downloaded, setDownloaded] = useState<string[]>([])
 
@@ -126,6 +133,54 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
     setStep(STEPS[Math.max(0, i - 1)].id)
   }, [step])
 
+  // Fetch available datasets from the backend on mount
+  useEffect(() => {
+    fetch("/api/datasets")
+      .then((res) => {
+        if (!res.ok) throw new Error("API not available")
+        return res.json()
+      })
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setAvailableDatasets(data)
+        }
+      })
+      .catch((err) => {
+        console.warn("Backend datasets fetch failed. Using mock datasets.", err)
+      })
+  }, [])
+
+  // --- Real Upload ---
+  const uploadFile = useCallback(async (file: File) => {
+    setUploading(true)
+    setUploadProgress(10)
+    
+    const formData = new FormData()
+    formData.append("file", file)
+    
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      })
+      if (!res.ok) throw new Error("Upload failed")
+      const newDataset = await res.json()
+      
+      setDataset(newDataset)
+      setAvailableDatasets((prev) => {
+        const filtered = prev.filter((d) => d.id !== newDataset.id)
+        return [newDataset, ...filtered]
+      })
+      setUploadProgress(100)
+      setUploading(false)
+      reachStep("configure")
+    } catch (err) {
+      console.error("Real upload failed, falling back to simulation.", err)
+      // Fallback
+      simulateUpload(DATASETS[0])
+    }
+  }, [reachStep])
+
   // --- Upload simulation ---
   const uploadTimer = useRef<ReturnType<typeof setInterval> | null>(null)
   const simulateUpload = useCallback(
@@ -142,16 +197,21 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
             reachStep("configure")
             return 100
           }
-          return Math.min(100, p + 7)
+          return Math.min(100, p + 10)
         })
-      }, 90)
+      }, 80)
     },
     [reachStep],
   )
 
-  const selectDataset = useCallback((d: Dataset) => setDataset(d), [])
+  const selectDataset = useCallback((d: Dataset) => {
+    setDataset(d)
+    setUploadProgress(100)
+    setUploading(false)
+    reachStep("configure")
+  }, [reachStep])
 
-  // --- Job simulation ---
+  // --- Mock Job Simulation ---
   const jobTimer = useRef<ReturnType<typeof setInterval> | null>(null)
   const loggedAt = useRef<Set<number>>(new Set())
 
@@ -165,7 +225,7 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
-  const startJob = useCallback(() => {
+  const startMockJob = useCallback(() => {
     if (jobTimer.current) clearInterval(jobTimer.current)
     setStatus("running")
     if (progress >= 100) {
@@ -184,8 +244,69 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
         }
         return np
       })
-    }, 260)
+    }, 200)
   }, [progress, tickLogs, reachStep])
+
+  // --- Real Job Polling ---
+  const pollJob = useCallback((id: string) => {
+    if (jobTimer.current) clearInterval(jobTimer.current)
+    
+    jobTimer.current = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/reconstruct/status/${id}`)
+        if (!res.ok) throw new Error("Status query failed")
+        const job = await res.json()
+        
+        setProgress(job.progress)
+        setLogs(job.logs)
+        
+        if (job.status === "complete") {
+          if (jobTimer.current) clearInterval(jobTimer.current)
+          setStatus("complete")
+          
+          // Fetch calculation results
+          const resultRes = await fetch(`/api/reconstruct/result/${id}`)
+          if (resultRes.ok) {
+            const resData = await resultRes.json()
+            setReconResult(resData)
+          }
+          reachStep("validation")
+        } else if (job.status === "failed") {
+          if (jobTimer.current) clearInterval(jobTimer.current)
+          setStatus("failed")
+        }
+      } catch (err) {
+        console.error("Error polling job status:", err)
+      }
+    }, 800)
+  }, [reachStep])
+
+  const startJob = useCallback(async () => {
+    if (!dataset) return
+    setStatus("running")
+    setProgress(0)
+    setLogs([])
+    setReconResult(null)
+    
+    try {
+      const res = await fetch("/api/reconstruct/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          datasetId: dataset.id,
+          config,
+        }),
+      })
+      
+      if (!res.ok) throw new Error("Failed to start job on server")
+      const data = await res.json()
+      setJobId(data.job_id)
+      pollJob(data.job_id)
+    } catch (err) {
+      console.warn("FastAPI backend failed to start. Falling back to mock simulation.", err)
+      startMockJob()
+    }
+  }, [dataset, config, startMockJob, pollJob])
 
   const pauseJob = useCallback(() => {
     if (jobTimer.current) clearInterval(jobTimer.current)
@@ -198,6 +319,8 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
     setProgress(0)
     setLogs([])
     setStatus("idle")
+    setJobId(null)
+    setReconResult(null)
   }, [])
 
   const markDownloaded = useCallback(
@@ -226,6 +349,8 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
         uploading,
         uploadProgress,
         simulateUpload,
+        uploadFile,
+        availableDatasets,
         config,
         setConfig,
         status,
@@ -234,6 +359,8 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
         startJob,
         pauseJob,
         resetJob,
+        jobId,
+        reconResult,
         downloaded,
         markDownloaded,
       }}
