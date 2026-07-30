@@ -4,7 +4,7 @@ TRINETRA-AI is a specialized, reliability-aware Earth observation reconstruction
 
 ---
 
-## 💡 The Challenge & Our Innovation
+## The Challenge & Our Innovation
 
 ### The Research Gap
 1. **LISS-IV Specificity**: Most cloud removal networks are trained for Sentinel-2 or Landsat-8 imagery, failing to account for the unique high spatial resolution (5.8 m/pixel) and 3-band spectral characteristics of LISS-IV.
@@ -20,7 +20,7 @@ TRINETRA-AI implements **Evidence-Constrained Multi-modal Reconstruction**:
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 | Layer | Component | Description |
 | :--- | :--- | :--- |
@@ -31,7 +31,7 @@ TRINETRA-AI implements **Evidence-Constrained Multi-modal Reconstruction**:
 
 ---
 
-## 📐 System Architecture
+## System Architecture
 
 The following block illustrates the end-to-end data flow from client-side uploads, reverse-proxy forwarding, background worker scheduling, and PyTorch model execution down to disk serialization and asset rendering:
 
@@ -64,7 +64,7 @@ graph TD
 
 ---
 
-## 🧠 Model Architecture & Technical Formulation
+## Model Architecture & Technical Formulation
 
 ### 1. Cloud Masking & Segmenting ($\mathbf{M}\_{cloud}$)
 Before neural processing, the cloudy region is segmented dynamically. An adaptive thresholding is calculated by minimizing the intra-class variance of the gray-scale intensity $\mathbf{I}\_{gray}$:
@@ -95,29 +95,29 @@ where $\mathcal{F}\_{\sigma}$ represents a Gaussian smoothing operator with kern
 
 ---
 
-## 📊 Scientific Quality Benchmarks
+## Scientific Quality Benchmarks
 
 Validated against reference ground-truth cloud-free acquisitions, the pipeline achieves the following validation performance scores:
 
-### 📈 Peak Signal-to-Noise Ratio (PSNR)
+### Peak Signal-to-Noise Ratio (PSNR)
 $$\text{PSNR} = 10 \cdot \log\_{10} \left( \frac{\text{MAX}\_I^2}{\text{MSE}} \right)$$
 * **Benchmark Achieved**: **34.8 dB** (Target benchmark: $\ge 30\text{ dB}$)
 
-### 📈 Structural Similarity Index (SSIM)
+### Structural Similarity Index (SSIM)
 $$\text{SSIM}(x,y) = \frac{(2\mu\_x\mu\_y + C\_1)(2\sigma\_{xy} + C\_2)}{(\mu\_x^2 + \mu\_y^2 + C\_1)(\sigma\_x^2 + \sigma\_y^2 + C\_2)}$$
 * **Benchmark Achieved**: **0.931** (Demonstrates high structural fidelity)
 
-### 📈 Spectral Angle Mapper (SAM)
+### Spectral Angle Mapper (SAM)
 $$\theta(\mathbf{s}\_i, \hat{\mathbf{s}}\_i) = \arccos \left( \frac{\mathbf{s}\_i \cdot \hat{\mathbf{s}}\_i}{\|\mathbf{s}\_i\|\_2 \|\hat{\mathbf{s}}\_i\|\_2} \right)$$
 * **Benchmark Achieved**: **3.42°** (Reflects minimal spectral distortion)
 
-### 📈 NDVI Index Preservation
+### NDVI Index Preservation
 $$\text{NDVI} = \frac{\mathbf{B}\_{\text{NIR}} - \mathbf{B}\_{\text{Red}}}{\mathbf{B}\_{\text{NIR}} + \mathbf{B}\_{\text{Red}}}$$
 * **Benchmark Achieved**: **97.6%** (Ensures agricultural and vegetation metrics remain scientifically valid)
 
 ---
 
-## 📁 Dataset Specifications
+## Dataset Specifications
 
 TRINETRA-AI supports ingestion of standard multi-sensor raster bundles:
 1. **LISS-IV Optical**: IRS Resourcesat-2A LISS-IV imagery (5.8m resolution, Green, Red, and NIR bands).
@@ -127,7 +127,7 @@ TRINETRA-AI supports ingestion of standard multi-sensor raster bundles:
 
 ---
 
-## ⚙️ Development & Quick Start
+## Development & Quick Start
 
 ### Prerequisites
 - Node.js (v18+) & `pnpm`
@@ -160,7 +160,7 @@ TRINETRA-AI supports ingestion of standard multi-sensor raster bundles:
 
 ---
 
-## 🧪 Integration Testing
+## Integration Testing
 
 To verify the endpoints, PyTorch tensor mapping, image masking, and output GeoTIFF/GeoJSON exports, run the integration test suite:
 ```bash
