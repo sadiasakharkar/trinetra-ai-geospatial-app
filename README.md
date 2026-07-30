@@ -64,9 +64,18 @@ graph TD
 
 ---
 
-## 🧠 Model Architecture & Performance
+## 🧠 Model Architecture & Technical Formulation
 
-### The Reconstruction Network (`TrinetraUNet`)
+### 1. Cloud Masking & Segmenting ($\mathbf{M}\_{cloud}$)
+Before neural processing, the cloudy region is segmented dynamically. An adaptive thresholding is calculated by minimizing the intra-class variance of the gray-scale intensity $\mathbf{I}\_{gray}$:
+$$\sigma\_w^2(t) = \omega\_0(t)\sigma\_0^2(t) + \omega\_1(t)\sigma\_1^2(t)$$
+Where $\omega\_0(t)$ and $\omega\_1(t)$ are the probabilities of the two classes separated by a threshold $t$, and $\sigma\_0^2(t)$, $\sigma\_1^2(t)$ are their respective variances. 
+
+This is followed by morphological opening and closing operators to fill cloud interior holes and segment shadow cast regions:
+$$\mathbf{M}\_{cloud} = (\mathbf{M}\_{raw} \bullet \mathbf{B}) \circ \mathbf{B}$$
+where $\mathbf{B}$ is a structuring element.
+
+### 2. Multi-modal Neural Fusion (`TrinetraUNet`)
 The deep neural network consists of an 8-channel input stack feeding a contracting-expanding encoder-decoder network with skip connections:
 $$\mathbf{X}\_{input} = [\mathbf{I}\_{cloudy} (3\text{ch}), \mathbf{I}\_{sar} (1\text{ch}), \mathbf{I}\_{dem} (1\text{ch}), \mathbf{I}\_{historical} (3\text{ch})]$$
 
@@ -75,12 +84,36 @@ The output layer branches into three distinct headers:
 2. **Confidence Heatmap** (1 channel, probability [0, 1])
 3. **Hallucination Risk Matrix** (1 channel, risk index [0, 1])
 
-### Scientific Quality Benchmarks
+The training is governed by a combined MSE loss and structural similarity constraint, where the evidence stack is injected at bottleneck latents:
+$$\mathcal{L}\_{\text{DiffCR}} = \mathbb{E}\_{\mathbf{x}\_0, \mathbf{y}, \boldsymbol{\epsilon}, t} \left[ \|\boldsymbol{\epsilon} - \boldsymbol{\epsilon}\_\theta(\mathbf{x}\_t, t, \mathbf{C}\_{\text{evidence}})\|^2 \right]$$
+Where $\mathbf{C}\_{\text{evidence}} = [\mathbf{I}\_{sar}, \mathbf{I}\_{dem}, \mathbf{I}\_{historical}]$ represents the conditioning tensors.
+
+### 3. Edge-Preserving Feathered Blending
+To prevent seam lines and boundaries at the edge of the reconstructed regions, the final output image $\mathbf{I}\_{final}$ is created using a spatial weighting function:
+$$\mathbf{I}\_{final}(x,y) = (1 - \mathcal{F}\_{\sigma}(\mathbf{M}\_{cloud})(x,y)) \cdot \mathbf{I}\_{cloudy}(x,y) + \mathcal{F}\_{\sigma}(\mathbf{M}\_{cloud})(x,y) \cdot \mathbf{I}\_{reconstructed}(x,y)$$
+where $\mathcal{F}\_{\sigma}$ represents a Gaussian smoothing operator with kernel standard deviation $\sigma$.
+
+---
+
+## 📊 Scientific Quality Benchmarks
+
 Validated against reference ground-truth cloud-free acquisitions, the pipeline achieves the following validation performance scores:
-* **Peak Signal-to-Noise Ratio (PSNR)**: **34.8 dB** (Target benchmark: $\ge 30\text{ dB}$)
-* **Structural Similarity Index (SSIM)**: **0.931** (Demonstrates high structural fidelity)
-* **Spectral Angle Mapper (SAM)**: **3.42°** (Reflects minimal spectral distortion)
-* **NDVI Index Preservation**: **97.6%** (Ensures agricultural and vegetation metrics remain scientifically valid)
+
+### 📈 Peak Signal-to-Noise Ratio (PSNR)
+$$\text{PSNR} = 10 \cdot \log\_{10} \left( \frac{\text{MAX}\_I^2}{\text{MSE}} \right)$$
+* **Benchmark Achieved**: **34.8 dB** (Target benchmark: $\ge 30\text{ dB}$)
+
+### 📈 Structural Similarity Index (SSIM)
+$$\text{SSIM}(x,y) = \frac{(2\mu\_x\mu\_y + C\_1)(2\sigma\_{xy} + C\_2)}{(\mu\_x^2 + \mu\_y^2 + C\_1)(\sigma\_x^2 + \sigma\_y^2 + C\_2)}$$
+* **Benchmark Achieved**: **0.931** (Demonstrates high structural fidelity)
+
+### 📈 Spectral Angle Mapper (SAM)
+$$\theta(\mathbf{s}\_i, \hat{\mathbf{s}}\_i) = \arccos \left( \frac{\mathbf{s}\_i \cdot \hat{\mathbf{s}}\_i}{\|\mathbf{s}\_i\|\_2 \|\hat{\mathbf{s}}\_i\|\_2} \right)$$
+* **Benchmark Achieved**: **3.42°** (Reflects minimal spectral distortion)
+
+### 📈 NDVI Index Preservation
+$$\text{NDVI} = \frac{\mathbf{B}\_{\text{NIR}} - \mathbf{B}\_{\text{Red}}}{\mathbf{B}\_{\text{NIR}} + \mathbf{B}\_{\text{Red}}}$$
+* **Benchmark Achieved**: **97.6%** (Ensures agricultural and vegetation metrics remain scientifically valid)
 
 ---
 
