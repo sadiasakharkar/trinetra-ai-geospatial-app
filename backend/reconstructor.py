@@ -82,7 +82,8 @@ class TrinetraReconstructor:
                 dataset_id: str, 
                 config: dict, 
                 job_id: str, 
-                log_callback=None) -> dict:
+                log_callback=None,
+                progress_callback=None) -> dict:
         """
         Runs the full reconstruction pipeline.
         """
@@ -92,7 +93,12 @@ class TrinetraReconstructor:
             else:
                 print(f"[{level.upper()}] {text}")
 
+        def set_progress(pct):
+            if progress_callback:
+                progress_callback(pct)
+
         log("Initializing reconstruction pipeline...", "info")
+        set_progress(5)
         time.sleep(0.1)
 
         # Mapping dataset ID to files
@@ -134,6 +140,7 @@ class TrinetraReconstructor:
                 cv2.imwrite(p, dummy)
 
         log("Loading scene tiles into GPU memory...", "info")
+        set_progress(12)
         # Load images
         cloudy_img = cv2.imread(cloudy_path)
         cloudy_img = cv2.cvtColor(cloudy_img, cv2.COLOR_BGR2RGB)
@@ -155,6 +162,7 @@ class TrinetraReconstructor:
         hist_img = cv2.resize(hist_img, (w, h))
 
         log("Generating cloud mask using pixel classification...", "info")
+        set_progress(25)
         # 1. Cloud Masking
         cloud_mask = self.detect_clouds(cloudy_img)
         cloud_pct = round((np.sum(cloud_mask) / (h * w)) * 100, 1)
@@ -163,6 +171,7 @@ class TrinetraReconstructor:
 
         # 2. Alignment
         log("Co-registering Sentinel-1 SAR (VV+VH)...", "info")
+        set_progress(40)
         # Simulate registration
         time.sleep(0.1)
         rmse = round(np.random.uniform(0.15, 0.45), 2)
@@ -170,6 +179,7 @@ class TrinetraReconstructor:
 
         # 3. Model Inference
         log("Stacking multi-sensor tensors (LISS-IV, SAR, DEM, Historical)...", "info")
+        set_progress(55)
         
         # Prepare tensors
         cloudy_t = torch.from_numpy(cloudy_img).permute(2, 0, 1).float().unsqueeze(0) / 255.0
@@ -190,6 +200,7 @@ class TrinetraReconstructor:
         pred_rgb = (pred_rgb_t.squeeze(0).permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
         pred_conf = (pred_conf_t.squeeze(0).squeeze(0).cpu().numpy() * 255).astype(np.uint8)
         pred_risk = (pred_risk_t.squeeze(0).squeeze(0).cpu().numpy() * 255).astype(np.uint8)
+        set_progress(70)
 
         log("Denoising cloud regions and blending boundaries...", "info")
         
@@ -217,6 +228,7 @@ class TrinetraReconstructor:
         mask_feathered = np.expand_dims(mask_feathered, axis=2) / 255.0
         
         reconstructed_img = ((1 - mask_feathered) * cloudy_img + mask_feathered * target_clear).astype(np.uint8)
+        set_progress(85)
         
         log("NDVI preservation check passed (97.6%)", "ok")
         log("Stitching tile boundaries...", "info")

@@ -9,6 +9,7 @@ import {
   HardDrive,
   CheckCircle2,
   Loader2,
+  X,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { DATASETS } from "@/lib/mock"
@@ -21,6 +22,7 @@ export function StepUpload() {
     dataset,
     selectDataset,
     uploadFile,
+    clearDataset,
     availableDatasets,
     uploading,
     uploadProgress,
@@ -160,9 +162,21 @@ export function StepUpload() {
                     ? `Ingesting ${dataset.name}…`
                     : `${dataset.name} ready`}
                 </p>
-                <span className="font-mono text-xs text-muted-foreground">
-                  {uploadProgress}%
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {uploadProgress}%
+                  </span>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault()
+                      clearDataset()
+                    }}
+                    className="rounded-md p-1 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                    aria-label="Delete dataset"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
               </div>
               <div className="mt-2">
                 <ProgressBar value={uploadProgress} tone={ready ? "green" : "primary"} />

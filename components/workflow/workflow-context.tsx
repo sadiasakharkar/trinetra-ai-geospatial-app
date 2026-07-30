@@ -53,6 +53,7 @@ type WorkflowState = {
   uploadProgress: number
   simulateUpload: (d: Dataset) => void
   uploadFile: (file: File) => Promise<void>
+  clearDataset: () => void
   availableDatasets: Dataset[]
 
   // config
@@ -211,6 +212,17 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
     reachStep("configure")
   }, [reachStep])
 
+  const clearDataset = useCallback(() => {
+    if (dataset) {
+      if (dataset.id.startsWith("UPLOAD")) {
+        setAvailableDatasets((prev) => prev.filter((d) => d.id !== dataset.id))
+      }
+    }
+    setDataset(null)
+    setUploadProgress(0)
+    setUploading(false)
+  }, [dataset])
+
   // --- Mock Job Simulation ---
   const jobTimer = useRef<ReturnType<typeof setInterval> | null>(null)
   const loggedAt = useRef<Set<number>>(new Set())
@@ -350,6 +362,7 @@ export function WorkflowProvider({ children }: { children: ReactNode }) {
         uploadProgress,
         simulateUpload,
         uploadFile,
+        clearDataset,
         availableDatasets,
         config,
         setConfig,

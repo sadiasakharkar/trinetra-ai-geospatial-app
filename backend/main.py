@@ -244,12 +244,18 @@ def run_reconstruction_task(job_id: str, dataset_id: str, config: dict):
         with jobs_lock:
             jobs[job_id]["progress"] = 15
             
+        def set_progress(pct):
+            with jobs_lock:
+                if job_id in jobs:
+                    jobs[job_id]["progress"] = pct
+
         # Run actual reconstructor process
         result = reconstructor.process(
             dataset_id=dataset_id, 
             config=config, 
             job_id=job_id, 
-            log_callback=log_line
+            log_callback=log_line,
+            progress_callback=set_progress
         )
         
         # Output generation for GeoTIFF / GeoJSON
