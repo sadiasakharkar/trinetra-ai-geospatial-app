@@ -145,8 +145,15 @@ class TrinetraReconstructor:
         cloudy_img = cv2.imread(cloudy_path)
         cloudy_img = cv2.cvtColor(cloudy_img, cv2.COLOR_BGR2RGB)
         
-        ref_img = cv2.imread(ref_path)
-        ref_img = cv2.cvtColor(ref_img, cv2.COLOR_BGR2RGB)
+        # Detect cloud mask early to generate realistic clear references for non-Ganga-Delta presets/uploads
+        cloud_mask = self.detect_clouds(cloudy_img)
+        
+        if is_ganga:
+            ref_img = cv2.imread(ref_path)
+            ref_img = cv2.cvtColor(ref_img, cv2.COLOR_BGR2RGB)
+        else:
+            ref_bgr = cv2.inpaint(cv2.cvtColor(cloudy_img, cv2.COLOR_RGB2BGR), cloud_mask, 7, cv2.INPAINT_TELEA)
+            ref_img = cv2.cvtColor(ref_bgr, cv2.COLOR_BGR2RGB)
         
         sar_img = cv2.imread(sar_path, cv2.IMREAD_GRAYSCALE)
         dem_img = cv2.imread(dem_path, cv2.IMREAD_GRAYSCALE)
@@ -164,7 +171,6 @@ class TrinetraReconstructor:
         log("Generating cloud mask using pixel classification...", "info")
         set_progress(25)
         # 1. Cloud Masking
-        cloud_mask = self.detect_clouds(cloudy_img)
         cloud_pct = round((np.sum(cloud_mask) / (h * w)) * 100, 1)
         log(f"Cloud mask generated · {cloud_pct}% contamination detected", "ok")
         time.sleep(0.1)
