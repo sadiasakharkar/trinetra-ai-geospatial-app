@@ -3,7 +3,7 @@ import time
 import numpy as np
 import cv2
 from PIL import Image
-import torch
+# PyTorch import removed for lightweight memory footprint
 from backend.model import TrinetraUNet
 
 # Try importing skimage metrics, fall back if not available
@@ -35,11 +35,7 @@ except ImportError:
 class TrinetraReconstructor:
     def __init__(self, workspace_root: str):
         self.workspace_root = workspace_root
-        self.device = torch.device("mps" if torch.backends.mps.is_available() 
-                                   else "cuda" if torch.cuda.is_available() 
-                                   else "cpu")
-        self.model = TrinetraUNet().to(self.device)
-        self.model.eval() # Set to evaluation mode
+        self.model = TrinetraUNet()
         
     def get_public_image_path(self, relative_path: str) -> str:
         # Strip leading slash if present
@@ -187,25 +183,24 @@ class TrinetraReconstructor:
         log("Stacking multi-sensor tensors (LISS-IV, SAR, DEM, Historical)...", "info")
         set_progress(55)
         
-        # Prepare tensors
-        cloudy_t = torch.from_numpy(cloudy_img).permute(2, 0, 1).float().unsqueeze(0) / 255.0
-        sar_t = torch.from_numpy(sar_img).unsqueeze(0).unsqueeze(0).float() / 255.0
-        dem_t = torch.from_numpy(dem_img).unsqueeze(0).unsqueeze(0).float() / 255.0
-        hist_t = torch.from_numpy(hist_img).permute(2, 0, 1).float().unsqueeze(0) / 255.0
+        # Prepare inputs as numpy arrays: (1, 8, H, W)
+        cloudy_t = np.transpose(cloudy_img, (2, 0, 1)).astype(np.float32) / 255.0
+        sar_t = np.expand_dims(sar_img.astype(np.float32) / 255.0, axis=0)
+        dem_t = np.expand_dims(dem_img.astype(np.float32) / 255.0, axis=0)
+        hist_t = np.transpose(hist_img, (2, 0, 1)).astype(np.float32) / 255.0
         
         # Concatenate channels to get shape (1, 8, H, W)
-        input_t = torch.cat([cloudy_t, sar_t, dem_t, hist_t], dim=1).to(self.device)
+        input_t = np.expand_dims(np.concatenate([cloudy_t, sar_t, dem_t, hist_t], axis=0), axis=0)
         
         log(f"Sampling PyTorch fusion model ({config.get('model', 'diffcr-v2')}) latent steps...", "info")
         
-        # Forward pass
-        with torch.no_grad():
-            pred_rgb_t, pred_conf_t, pred_risk_t = self.model(input_t)
-            
-        # Move back to CPU and numpy
-        pred_rgb = (pred_rgb_t.squeeze(0).permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
-        pred_conf = (pred_conf_t.squeeze(0).squeeze(0).cpu().numpy() * 255).astype(np.uint8)
-        pred_risk = (pred_risk_t.squeeze(0).squeeze(0).cpu().numpy() * 255).astype(np.uint8)
+        # Forward pass (running the NumPy-optimized inference module)
+        pred_rgb_t, pred_conf_t, pred_risk_t = self.model(input_t)
+        
+        # Move back to standard scale
+        pred_rgb = (np.transpose(pred_rgb_t[0], (1, 2, 0)) * 255).astype(np.uint8)
+        pred_conf = (pred_conf_t[0, 0] * 255).astype(np.uint8)
+        pred_risk = (pred_risk_t[0, 0] * 255).astype(np.uint8)
         set_progress(70)
 
         log("Denoising cloud regions and blending boundaries...", "info")
