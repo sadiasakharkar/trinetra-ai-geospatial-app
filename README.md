@@ -31,11 +31,44 @@ TRINETRA-AI implements **Evidence-Constrained Multi-modal Reconstruction**:
 
 ---
 
+## 📐 System Architecture
+
+The following block illustrates the end-to-end data flow from client-side uploads, reverse-proxy forwarding, background worker scheduling, and PyTorch model execution down to disk serialization and asset rendering:
+
+```mermaid
+graph TD
+    subgraph Frontend [Next.js React Frontend]
+        UI[Workflow Stepper UI]
+        Ctx[Workflow Context State]
+    end
+
+    subgraph Backend [FastAPI Python Server]
+        API[main.py: REST Endpoints]
+        Pipeline[reconstructor.py: Processing Engine]
+        Model[model.py: PyTorch TrinetraUNet]
+    end
+
+    subgraph Storage [Public Directory]
+        Assets[Sample Images & Uploads]
+        Outputs[Processed PNGs, TIFFs & JSONs]
+    end
+
+    UI <--> Ctx
+    Ctx -- Proxy Rewrite /api --> API
+    API -- Background Worker --> Pipeline
+    Pipeline -- Multi-modal Input --> Model
+    Model -- Forward Pass --> Pipeline
+    Pipeline -- Saves --> Outputs
+    Outputs -. Renders in .-> UI
+```
+
+---
+
 ## 🧠 Model Architecture & Performance
 
 ### The Reconstruction Network (`TrinetraUNet`)
 The deep neural network consists of an 8-channel input stack feeding a contracting-expanding encoder-decoder network with skip connections:
-$$\mathbf{X}_{input} = [\mathbf{I}_{cloudy} (3\text{ch}), \mathbf{I}_{sar} (1\text{ch}), \mathbf{I}_{dem} (1\text{ch}), \mathbf{I}_{historical} (3\text{ch})]$$
+$$\mathbf{X}\_{input} = [\mathbf{I}\_{cloudy} (3\text{ch}), \mathbf{I}\_{sar} (1\text{ch}), \mathbf{I}\_{dem} (1\text{ch}), \mathbf{I}\_{historical} (3\text{ch})]$$
 
 The output layer branches into three distinct headers:
 1. **Reconstructed Scene** (3 channels, RGB normalized)
