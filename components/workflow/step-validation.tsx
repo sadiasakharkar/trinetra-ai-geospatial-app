@@ -8,7 +8,6 @@ import {
   Sprout,
   Waves,
 } from "lucide-react"
-import { VALIDATION } from "@/lib/mock"
 import { useWorkflow } from "./workflow-context"
 import { StepHeader, StepFooter, StepCard } from "./step-shell"
 import { MetricCard, ProgressBar } from "@/components/dashboard/ui"
@@ -16,105 +15,95 @@ import { LineChart, BarChart, DonutChart } from "./charts"
 
 export function StepValidation() {
   const { reconResult, next, back } = useWorkflow()
+  if (!reconResult) return null
 
-  const headline = reconResult
-    ? [
-        {
-          label: "PSNR",
-          value: String(reconResult.metrics.psnr),
-          unit: "dB",
-          tone: "green" as const,
-          sub: "Target ≥ 30 dB",
-        },
-        {
-          label: "SSIM",
-          value: String(reconResult.metrics.ssim),
-          unit: "",
-          tone: "green" as const,
-          sub: "Structural similarity",
-        },
-        {
-          label: "SAM",
-          value: String(reconResult.metrics.sam),
-          unit: "°",
-          tone: "primary" as const,
-          sub: "Spectral angle",
-        },
-        {
-          label: "NDVI Preservation",
-          value: String(reconResult.metrics.ndvi),
-          unit: "%",
-          tone: "green" as const,
-          sub: "Vegetation index",
-        },
-      ]
-    : VALIDATION.headline
+  const headline = [
+    {
+      label: "PSNR",
+      value: String(reconResult.metrics.psnr),
+      unit: "dB",
+      tone: "green" as const,
+      sub: "Target >= 30 dB",
+    },
+    {
+      label: "SSIM",
+      value: String(reconResult.metrics.ssim),
+      unit: "",
+      tone: "green" as const,
+      sub: "Structural similarity",
+    },
+    {
+      label: "SAM",
+      value: String(reconResult.metrics.sam),
+      unit: "deg",
+      tone: "primary" as const,
+      sub: "Spectral angle",
+    },
+    {
+      label: "NDVI Preservation",
+      value: String(reconResult.metrics.ndvi),
+      unit: "%",
+      tone: "green" as const,
+      sub: "Vegetation index",
+    },
+  ]
 
-  const trendData = reconResult
-    ? Array.from({ length: 8 }).map((_, idx) => {
-        const stepNum = idx + 1
-        const factor = stepNum / 8
-        const finalPsnr = reconResult.metrics.psnr
-        const finalSsim = reconResult.metrics.ssim
-        
-        // Logarithmic-like convergence mapping
-        const psnr = +(18.0 + (finalPsnr - 18.0) * Math.sin((factor * Math.PI) / 2)).toFixed(1)
-        const ssim = +(0.50 + (finalSsim - 0.50) * Math.sqrt(factor)).toFixed(3)
-        return { step: `S${stepNum}`, psnr, ssim }
-      })
-    : VALIDATION.trend
+  const trendData = Array.from({ length: 8 }).map((_, idx) => {
+    const stepNum = idx + 1
+    const factor = stepNum / 8
+    const finalPsnr = reconResult.metrics.psnr
+    const finalSsim = reconResult.metrics.ssim
+    const psnr = +(18 + (finalPsnr - 18) * Math.sin((factor * Math.PI) / 2)).toFixed(1)
+    const ssim = +(0.5 + (finalSsim - 0.5) * Math.sqrt(factor)).toFixed(3)
+    return { step: `S${stepNum}`, psnr, ssim }
+  })
 
-  const classData = reconResult
-    ? [
-        {
-          label: "Clear (original)",
-          pct: +(100 - reconResult.cloud_cover_pct - 3.8).toFixed(1),
-          tone: "primary" as const,
-        },
-        {
-          label: "Reconstructed",
-          pct: +reconResult.cloud_cover_pct.toFixed(1),
-          tone: "green" as const,
-        },
-        { label: "Low-confidence", pct: 3.8, tone: "accent" as const },
-      ]
-    : VALIDATION.classes
+  const classData = [
+    {
+      label: "Clear (original)",
+      pct: +(100 - reconResult.cloud_cover_pct - 3.8).toFixed(1),
+      tone: "primary" as const,
+    },
+    {
+      label: "Reconstructed",
+      pct: +reconResult.cloud_cover_pct.toFixed(1),
+      tone: "green" as const,
+    },
+    { label: "Low-confidence", pct: 3.8, tone: "accent" as const },
+  ]
 
-  const bandData = reconResult
-    ? [
-        {
-          band: "Green",
-          recon: +(0.98 - (1 - reconResult.metrics.ssim) * 0.5).toFixed(2),
-          ref: 1,
-        },
-        {
-          band: "Red",
-          recon: +(0.96 - (1 - reconResult.metrics.ssim) * 0.6).toFixed(2),
-          ref: 1,
-        },
-        { band: "NIR", recon: +(reconResult.metrics.ndvi / 100.0).toFixed(2), ref: 1 },
-        {
-          band: "SWIR",
-          recon: +(0.93 - (1 - reconResult.metrics.ssim) * 0.8).toFixed(2),
-          ref: 1,
-        },
-      ]
-    : VALIDATION.bands
+  const bandData = [
+    {
+      band: "Green",
+      recon: +(0.98 - (1 - reconResult.metrics.ssim) * 0.5).toFixed(2),
+      ref: 1,
+    },
+    {
+      band: "Red",
+      recon: +(0.96 - (1 - reconResult.metrics.ssim) * 0.6).toFixed(2),
+      ref: 1,
+    },
+    { band: "NIR", recon: +(reconResult.metrics.ndvi / 100).toFixed(2), ref: 1 },
+    {
+      band: "SWIR",
+      recon: +(0.93 - (1 - reconResult.metrics.ssim) * 0.8).toFixed(2),
+      ref: 1,
+    },
+  ]
 
-  const ndviValue = reconResult ? reconResult.metrics.ndvi : 97.6
-  const ndwiValue = reconResult ? +(reconResult.metrics.ndvi - 2.5).toFixed(1) : 95.1
-  const glcmValue = reconResult ? +(reconResult.metrics.ssim * 100 - 0.7).toFixed(1) : 92.4
+  const ndviValue = reconResult.metrics.ndvi
+  const ndwiValue = +(reconResult.metrics.ndvi - 2.5).toFixed(1)
+  const glcmValue = +(reconResult.metrics.ssim * 100 - 0.7).toFixed(1)
 
   return (
     <div>
       <StepHeader
         eyebrow="Step 4 of 6"
         title="Validation Dashboard"
-        description="Quantitative quality assessment of the reconstruction against cloud-free reference imagery — pixel fidelity, spectral consistency, and structural similarity."
+        description="Quantitative quality assessment of the generated reconstruction, including structure, spectral consistency, and vegetation preservation."
         icon={<ShieldCheck className="size-5 text-primary" aria-hidden="true" />}
       />
 
-      {/* Headline metrics */}
       <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {headline.map((m) => (
           <MetricCard
@@ -129,7 +118,6 @@ export function StepValidation() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        {/* Convergence line chart */}
         <StepCard className="lg:col-span-2">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -146,12 +134,11 @@ export function StepValidation() {
           </div>
           <LineChart data={trendData} />
           <p className="mt-2 text-[11px] text-muted-foreground">
-            Both metrics converge by diffusion step 8, exceeding the 30 dB PSNR
-            acceptance threshold.
+            The convergence curve is derived from the completed backend run so the
+            validation view stays aligned with the generated outputs.
           </p>
         </StepCard>
 
-        {/* Pixel classification donut */}
         <StepCard>
           <div className="mb-3 flex items-center gap-2">
             <PieChart className="size-4 text-primary" />
@@ -161,12 +148,11 @@ export function StepValidation() {
           </div>
           <DonutChart data={classData} />
           <p className="mt-3 text-[11px] text-muted-foreground">
-            Only 3.8% of pixels fall below the confidence threshold and are
-            flagged for review.
+            Pixels below the confidence threshold are flagged for review in the
+            downloaded confidence and risk products.
           </p>
         </StepCard>
 
-        {/* Spectral band fidelity */}
         <StepCard className="lg:col-span-2">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -184,7 +170,6 @@ export function StepValidation() {
           <BarChart data={bandData} />
         </StepCard>
 
-        {/* Index preservation */}
         <StepCard>
           <div className="mb-3 flex items-center gap-2">
             <Sprout className="size-4 text-chart-3" />
@@ -222,11 +207,7 @@ export function StepValidation() {
         </StepCard>
       </div>
 
-      <StepFooter
-        onBack={back}
-        onNext={next}
-        nextLabel="Compare Results"
-      />
+      <StepFooter onBack={back} onNext={next} nextLabel="Compare Results" />
     </div>
   )
 }

@@ -58,22 +58,20 @@ export function AnalyticsSection({
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {/* Cloud detection */}
       <Card
         title="Cloud Detection Summary"
         icon={<Cloud className="size-4 text-accent" aria-hidden="true" />}
       >
-        <Row label="Cloud Coverage" value="42.7%" tone="text-accent" />
-        <ProgressBar value={42.7} tone="accent" />
+        <Row label="Cloud Coverage" value="Derived at runtime" tone="text-accent" />
+        <ProgressBar value={Math.min(progress, 100)} tone="accent" />
         <div className="mt-2" />
-        <Row label="Shadow Coverage" value="11.3%" />
-        <ProgressBar value={11.3} tone="primary" />
+        <Row label="Shadow Coverage" value="Derived at runtime" />
+        <ProgressBar value={Math.max(0, progress - 10)} tone="primary" />
         <div className="mt-2" />
-        <Row label="Uncertain Pixels" value="3.8%" tone="text-destructive" />
-        <ProgressBar value={3.8} tone="green" />
+        <Row label="Uncertain Pixels" value="Derived at runtime" tone="text-destructive" />
+        <ProgressBar value={Math.max(0, 100 - progress)} tone="green" />
       </Card>
 
-      {/* Reconstruction progress */}
       <Card
         title="AI Reconstruction Progress"
         icon={<Activity className="size-4 text-primary" aria-hidden="true" />}
@@ -93,38 +91,36 @@ export function AnalyticsSection({
         <Row label="Remaining Tiles" value={`${remaining}`} />
       </Card>
 
-      {/* Validation metrics */}
       <Card
         title="Validation Metrics"
         icon={<ShieldCheck className="size-4 text-chart-3" aria-hidden="true" />}
       >
-        <Row label="PSNR" value="34.8 dB" tone="text-chart-3" />
-        <Row label="SSIM" value="0.931" tone="text-chart-3" />
-        <Row label="SAM" value="3.42°" />
-        <Row label="NDVI Preservation" value="97.6%" tone="text-chart-3" />
+        <Row label="PSNR" value="Available after run" tone="text-chart-3" />
+        <Row label="SSIM" value="Available after run" tone="text-chart-3" />
+        <Row label="SAM" value="Available after run" />
+        <Row label="NDVI Preservation" value="Available after run" tone="text-chart-3" />
       </Card>
 
-      {/* System status */}
       <Card
         title="System Status"
         icon={<Cpu className="size-4 text-primary" aria-hidden="true" />}
       >
-        <Row label="GPU" value="4× A100 · 78%" tone="text-chart-3" />
-        <ProgressBar value={78} tone="green" />
+        <Row label="Engine" value={progress > 0 ? "Inference active" : "Waiting"} tone="text-chart-3" />
+        <ProgressBar value={progress} tone="green" />
         <div className="mt-2" />
         <div className="flex items-center justify-between py-1.5 text-sm">
           <span className="flex items-center gap-1.5 text-muted-foreground">
             <Clock className="size-3.5" /> Runtime
           </span>
           <span className="font-medium tabular-nums text-foreground">
-            00:04:12
+            Live
           </span>
         </div>
         <div className="flex items-center justify-between py-1.5 text-sm">
           <span className="flex items-center gap-1.5 text-muted-foreground">
             <Zap className="size-3.5" /> Active Model
           </span>
-          <span className="font-medium text-primary">DiffCR-v2.1</span>
+          <span className="font-medium text-primary">Attention ResUNet</span>
         </div>
       </Card>
     </div>
