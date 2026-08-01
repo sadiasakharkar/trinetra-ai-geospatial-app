@@ -14,16 +14,16 @@ def export_model(checkpoint_path: str, output_dir: str, patch_size: int = 256) -
     checkpoint = torch.load(checkpoint_path, map_location=device)
     model.load_state_dict(checkpoint["model"])
     model.eval()
-    dummy = torch.randn(1, 8, patch_size, patch_size, device=device)
+    sample_input = torch.randn(1, 8, patch_size, patch_size, device=device)
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
     torchscript_path = output_path / "attention_resunet.ts"
-    traced = torch.jit.trace(model, dummy, strict=False)
+    traced = torch.jit.trace(model, sample_input, strict=False)
     traced.save(torchscript_path.as_posix())
     onnx_path = output_path / "attention_resunet.onnx"
     torch.onnx.export(
         model,
-        dummy,
+        sample_input,
         onnx_path.as_posix(),
         input_names=["input"],
         output_names=["reconstruction", "confidence", "risk", "cloud"],

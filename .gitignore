@@ -30,3 +30,8 @@ htmlcov/
 # Local runtime artifacts
 .cache/
 public/uploads/
+public/output/
+public/previews/
+public/thumbnails/
+public/confidence/
+public/masks/

@@ -1,0 +1,17 @@
+{
+  "scene": "Himalayan Region",
+  "terrain": "mountain",
+  "country": "India",
+  "coords": "31.1048N / 77.1734E",
+  "cloud_percentage": 34.5,
+  "resolution_px": {
+    "width": 640,
+    "height": 384
+  },
+  "bands": [
+    "red",
+    "green",
+    "blue"
+  ],
+  "license": "Synthetic demo sample generated for TRINETRA-AI repository demos"
+}

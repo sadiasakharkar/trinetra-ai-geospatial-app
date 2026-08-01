@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 import uuid
 from pathlib import Path
 from threading import Lock
@@ -17,7 +18,9 @@ except ImportError:  # pragma: no cover
     Image = None
 
 from backend.config import Settings
+from backend.datasets import dataset_path_from_url, find_dataset, load_sample_datasets, load_uploaded_datasets
 from backend.logging_utils import get_logger
+from backend.media import public_url, save_gray, save_rgb, save_thumbnail
 from backend.ml.inference import InferenceEngine
 from backend.ml.weights import WeightManager
 from backend.pipeline import CloudRemovalPipeline, PipelineError
@@ -73,9 +76,7 @@ class TrinetraService:
             return str(exc)
 
     def list_datasets(self) -> list[dict]:
-        from backend.datasets import SAMPLE_DATASETS, load_uploaded_datasets
-
-        return SAMPLE_DATASETS + load_uploaded_datasets(self.settings.upload_dir)
+        return load_sample_datasets(self.settings.dataset_dir) + load_uploaded_datasets(self.settings.upload_dir)
 
     def ingest_upload(self, filename: str, content: bytes) -> dict:
         if len(content) > self.settings.max_upload_size_bytes:
@@ -92,29 +93,63 @@ class TrinetraService:
             raise PipelineError("Pillow is required for upload ingestion.")
         raster = self.pipeline.load_raster(raw_path)
         preview_path = upload_dir / "cloudy.png"
-        Image.fromarray(self._to_uint8(raster.image[..., :3])).save(preview_path)
+        save_rgb(preview_path, self._to_uint8(raster.image[..., :3]))
+        thumbnail_path = upload_dir / "thumbnail.png"
+        save_thumbnail(preview_path, thumbnail_path)
         detection = self.pipeline.detect_clouds(self.pipeline.normalize(raster.image[..., :3]))
         if cv2 is None:
             raise PipelineError("OpenCV is required for upload ingestion.")
         mask_path = upload_dir / "cloud_mask.png"
-        Image.fromarray((detection["cloud_mask"] * 255).astype("uint8")).save(mask_path)
+        save_gray(mask_path, detection["cloud_mask"] * 255)
+        historical_path = upload_dir / "historical.png"
+        save_rgb(historical_path, self._to_uint8(raster.image[..., :3]))
+        public_preview_path = self.settings.preview_dir / dataset_id / "cloudy.png"
+        public_thumbnail_path = self.settings.thumbnail_dir / dataset_id / "thumbnail.png"
+        public_mask_path = self.settings.mask_dir / dataset_id / "cloud_mask.png"
+        save_rgb(public_preview_path, self._to_uint8(raster.image[..., :3]))
+        save_thumbnail(public_preview_path, public_thumbnail_path)
+        save_gray(public_mask_path, detection["cloud_mask"] * 255)
+        cloud_cover = round(float(detection["cloud_mask"].mean() * 100.0), 3)
+        image_url = public_url(public_preview_path, self.settings.public_dir, "")
+        thumbnail_url = public_url(public_thumbnail_path, self.settings.public_dir, "")
+        mask_url = public_url(public_mask_path, self.settings.public_dir, "")
+        historical_url = public_url(historical_path, self.settings.public_dir, "")
         metadata = {
             "id": dataset_id,
             "name": f"Custom Upload - {Path(filename).name}",
             "sensor": "User Uploaded Scene",
             "region": "Uploaded AOI",
-            "acquired": os.path.getmtime(raw_path),
+            "acquired": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(os.path.getmtime(raw_path))),
             "resolution": f"{raster.image.shape[1]} x {raster.image.shape[0]}",
             "area": f"{round((raster.image.shape[0] * raster.image.shape[1]) / 1_000_000, 3)} Mpix",
-            "cloudCover": round(float(detection["cloud_mask"].mean() * 100.0), 3),
+            "cloudCover": cloud_cover,
             "size": f"{round(raw_path.stat().st_size / (1024 * 1024), 3)} MB",
             "coords": str(raster.crs) if raster.crs else "Unreferenced",
-            "thumb": f"/uploads/{dataset_id}/cloudy.png",
-            "reconstructed": f"/uploads/{dataset_id}/cloudy.png",
-            "sar": f"/uploads/{dataset_id}/cloudy.png",
-            "dem": f"/uploads/{dataset_id}/cloudy.png",
-            "temporal": [{"date": "Uploaded", "img": f"/uploads/{dataset_id}/cloudy.png", "clear": False}],
+            "preview_image_url": image_url,
+            "thumbnail_url": thumbnail_url,
+            "cloud_mask_url": mask_url,
+            "historical_image_url": historical_url,
+            "clear_reference_url": historical_url,
+            "reconstructed_image_url": historical_url,
+            "dataset_json_url": f"/uploads/{dataset_id}/metadata.json",
+            "thumb": thumbnail_url,
+            "reconstructed": historical_url,
+            "sar": mask_url,
+            "dem": historical_url,
+            "temporal": [{"date": "Uploaded", "img": historical_url, "clear": True}, {"date": "Current", "img": image_url, "clear": False}],
             "files": {"primary": raw_path.name},
+            "geographic_info": {
+                "crs": str(raster.crs) if raster.crs else "Unreferenced",
+                "bounds": None,
+                "transform": str(raster.transform) if raster.transform else None,
+            },
+            "metadata": {
+                "filename": Path(filename).name,
+                "width": int(raster.image.shape[1]),
+                "height": int(raster.image.shape[0]),
+                "bands": int(raster.image.shape[2]),
+                "cloud_percentage": cloud_cover,
+            },
         }
         (upload_dir / "metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
         self.logger.info("Ingested upload %s into dataset %s", filename, dataset_id)
@@ -126,7 +161,12 @@ class TrinetraService:
             metadata = json.loads((dataset_dir / "metadata.json").read_text(encoding="utf-8"))
             primary_path = dataset_dir / metadata["files"]["primary"]
         else:
-            primary_path = self.settings.public_dir / "images" / "liss-iv-cloudy.png"
+            metadata = find_dataset(self.settings.dataset_dir, dataset_id)
+            if metadata is None:
+                raise PipelineError(f"Dataset {dataset_id} was not found.")
+            primary_path = dataset_path_from_url(self.settings.dataset_dir, metadata.get("preview_image_url"))
+            if primary_path is None:
+                raise PipelineError(f"Dataset {dataset_id} does not include a valid preview image.")
         if not primary_path.exists():
             raise PipelineError(f"Primary raster was not found for dataset {dataset_id}.")
         raster = self.pipeline.load_raster(primary_path)
@@ -145,6 +185,13 @@ class TrinetraService:
             },
             "detailed_metrics": metrics,
             "output_paths": output_paths,
+            "preview_image_url": output_paths["preview_image_url"],
+            "thumbnail_url": output_paths["thumbnail_url"],
+            "cloud_mask_url": output_paths["cloud_mask_url"],
+            "confidence_map_url": output_paths["confidence_map_url"],
+            "reconstructed_image_url": output_paths["reconstructed_image_url"],
+            "download_urls": output_paths["download_urls"],
+            "metadata": metadata,
         }
 
     @staticmethod

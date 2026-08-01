@@ -1,0 +1,17 @@
+{
+  "scene": "Western Ghats",
+  "terrain": "forest",
+  "country": "India",
+  "coords": "11.4064N / 76.6932E",
+  "cloud_percentage": 47.2,
+  "resolution_px": {
+    "width": 640,
+    "height": 384
+  },
+  "bands": [
+    "red",
+    "green",
+    "blue"
+  ],
+  "license": "Synthetic demo sample generated for TRINETRA-AI repository demos"
+}

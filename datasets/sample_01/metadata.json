@@ -1,0 +1,17 @@
+{
+  "scene": "Ganga Delta",
+  "terrain": "river",
+  "country": "India",
+  "coords": "22.0470N / 88.7470E",
+  "cloud_percentage": 38.4,
+  "resolution_px": {
+    "width": 640,
+    "height": 384
+  },
+  "bands": [
+    "red",
+    "green",
+    "blue"
+  ],
+  "license": "Synthetic demo sample generated for TRINETRA-AI repository demos"
+}

@@ -1,0 +1,17 @@
+{
+  "scene": "Krishna Basin",
+  "terrain": "agriculture",
+  "country": "India",
+  "coords": "16.5062N / 80.6480E",
+  "cloud_percentage": 50.6,
+  "resolution_px": {
+    "width": 640,
+    "height": 384
+  },
+  "bands": [
+    "red",
+    "green",
+    "blue"
+  ],
+  "license": "Synthetic demo sample generated for TRINETRA-AI repository demos"
+}

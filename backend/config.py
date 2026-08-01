@@ -9,8 +9,13 @@ from pathlib import Path
 class Settings:
     workspace_root: Path
     public_dir: Path = field(init=False)
+    dataset_dir: Path = field(init=False)
     upload_dir: Path = field(init=False)
     output_dir: Path = field(init=False)
+    preview_dir: Path = field(init=False)
+    thumbnail_dir: Path = field(init=False)
+    confidence_dir: Path = field(init=False)
+    mask_dir: Path = field(init=False)
     cache_dir: Path = field(init=False)
     weights_dir: Path = field(init=False)
     model_url: str | None = field(default_factory=lambda: os.getenv("TRINETRA_MODEL_URL"))
@@ -27,11 +32,25 @@ class Settings:
 
     def __post_init__(self) -> None:
         self.public_dir = self.workspace_root / "public"
+        self.dataset_dir = self.workspace_root / "datasets"
         self.upload_dir = self.public_dir / "uploads"
         self.output_dir = self.public_dir / "output"
+        self.preview_dir = self.public_dir / "previews"
+        self.thumbnail_dir = self.public_dir / "thumbnails"
+        self.confidence_dir = self.public_dir / "confidence"
+        self.mask_dir = self.public_dir / "masks"
         self.cache_dir = self.workspace_root / ".cache" / "trinetra"
         self.weights_dir = self.cache_dir / "weights"
-        for path in (self.upload_dir, self.output_dir, self.weights_dir):
+        for path in (
+            self.dataset_dir,
+            self.upload_dir,
+            self.output_dir,
+            self.preview_dir,
+            self.thumbnail_dir,
+            self.confidence_dir,
+            self.mask_dir,
+            self.weights_dir,
+        ):
             path.mkdir(parents=True, exist_ok=True)
 
     @property

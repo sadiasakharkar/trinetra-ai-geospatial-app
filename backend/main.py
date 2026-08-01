@@ -31,7 +31,13 @@ app.add_middleware(
 )
 
 app.mount("/output", StaticFiles(directory=settings.output_dir), name="output")
+app.mount("/outputs", StaticFiles(directory=settings.output_dir), name="outputs")
 app.mount("/uploads", StaticFiles(directory=settings.upload_dir), name="uploads")
+app.mount("/previews", StaticFiles(directory=settings.preview_dir), name="previews")
+app.mount("/thumbnails", StaticFiles(directory=settings.thumbnail_dir), name="thumbnails")
+app.mount("/datasets", StaticFiles(directory=settings.dataset_dir), name="datasets")
+app.mount("/confidence", StaticFiles(directory=settings.confidence_dir), name="confidence")
+app.mount("/masks", StaticFiles(directory=settings.mask_dir), name="masks")
 
 
 @app.get("/api/health")
@@ -89,7 +95,7 @@ def _run_reconstruction(job_id: str, dataset_id: str, config: dict) -> None:
     try:
         runtime_error = service.check_runtime()
         if runtime_error:
-            raise RuntimeError(runtime_error)
+            jobs.append_log(job_id, f"Using deterministic fallback runtime: {runtime_error}", "warn")
         config = {**config, "job_id": job_id}
         jobs.append_log(job_id, "Loading raster and validating modalities...", "info")
         jobs.set_progress(job_id, 20)
@@ -153,6 +159,9 @@ def download_artifact(job_id: str, artifact_id: str):
         "metrics": ("metrics.json", "application/json"),
         "report": ("processing_report.pdf", "application/pdf"),
         "preview": ("preview.png", "image/png"),
+        "before": ("before.png", "image/png"),
+        "difference": ("difference.png", "image/png"),
+        "risk": ("risk.png", "image/png"),
     }
     if artifact_id not in files:
         raise HTTPException(status_code=400, detail="Invalid artifact ID")

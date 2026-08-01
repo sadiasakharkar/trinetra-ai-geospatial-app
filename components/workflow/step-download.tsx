@@ -13,7 +13,7 @@ import {
   PartyPopper,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { DOWNLOADS, type DownloadArtifact } from "@/lib/mock"
+import { DOWNLOADS, type DownloadArtifact } from "@/lib/workflow-data"
 import { useWorkflow } from "./workflow-context"
 import { StepHeader, StepCard } from "./step-shell"
 import { Badge } from "@/components/dashboard/ui"

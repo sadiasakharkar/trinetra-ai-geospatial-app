@@ -1,0 +1,17 @@
+{
+  "scene": "Kerala Coast",
+  "terrain": "coast",
+  "country": "India",
+  "coords": "9.4981N / 76.3388E",
+  "cloud_percentage": 41.9,
+  "resolution_px": {
+    "width": 640,
+    "height": 384
+  },
+  "bands": [
+    "red",
+    "green",
+    "blue"
+  ],
+  "license": "Synthetic demo sample generated for TRINETRA-AI repository demos"
+}

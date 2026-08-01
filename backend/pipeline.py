@@ -32,6 +32,7 @@ except ImportError:  # pragma: no cover
 
 from backend.config import Settings
 from backend.logging_utils import get_logger
+from backend.media import save_difference, save_gray, save_heatmap, save_rgb, save_thumbnail
 from backend.ml.inference import InferenceEngine
 
 
@@ -265,22 +266,40 @@ class CloudRemovalPipeline:
         metrics: dict[str, float],
     ) -> dict[str, str]:
         output_dir.mkdir(parents=True, exist_ok=True)
+        before_png = output_dir / "before.png"
         reconstructed_png = output_dir / "reconstructed.png"
         confidence_png = output_dir / "confidence.png"
+        confidence_heatmap_png = output_dir / "confidence_heatmap.png"
         risk_png = output_dir / "risk.png"
         cloud_mask_png = output_dir / "cloud_mask.png"
+        difference_png = output_dir / "difference.png"
         if Image is None:
             raise PipelineError("Pillow is required to write preview outputs.")
-        Image.fromarray(outputs["reconstructed"]).save(reconstructed_png)
-        Image.fromarray((outputs["confidence"] * 255.0).astype(np.uint8)).save(confidence_png)
-        Image.fromarray((outputs["risk"] * 255.0).astype(np.uint8)).save(risk_png)
-        Image.fromarray((outputs["cloud_mask"] * 255).astype(np.uint8)).save(cloud_mask_png)
+        before = self.normalize(raster.image[..., :3])
+        before_u8 = np.clip(before * 255.0, 0, 255).astype(np.uint8)
+        save_rgb(before_png, before_u8)
+        save_rgb(reconstructed_png, outputs["reconstructed"])
+        save_gray(confidence_png, outputs["confidence"])
+        save_heatmap(confidence_heatmap_png, outputs["confidence"])
+        save_gray(risk_png, outputs["risk"])
+        save_gray(cloud_mask_png, outputs["cloud_mask"] * 255)
+        save_difference(difference_png, before_u8, outputs["reconstructed"])
         metrics_path = output_dir / "metrics.json"
         metrics_path.write_text(json.dumps({"metrics": metrics}, indent=2), encoding="utf-8")
         report_path = output_dir / "processing_report.pdf"
         report_path.write_bytes(self._render_pdf_report(metrics))
         preview_path = output_dir / "preview.png"
-        Image.fromarray(outputs["reconstructed"]).save(preview_path)
+        save_rgb(preview_path, outputs["reconstructed"])
+        thumbnail_path = output_dir / "thumbnail.png"
+        save_thumbnail(preview_path, thumbnail_path)
+        public_preview_path = self.settings.preview_dir / output_dir.name / "preview.png"
+        public_thumbnail_path = self.settings.thumbnail_dir / output_dir.name / "thumbnail.png"
+        public_confidence_path = self.settings.confidence_dir / output_dir.name / "confidence_heatmap.png"
+        public_mask_path = self.settings.mask_dir / output_dir.name / "cloud_mask.png"
+        save_rgb(public_preview_path, outputs["reconstructed"])
+        save_thumbnail(public_preview_path, public_thumbnail_path)
+        save_heatmap(public_confidence_path, outputs["confidence"])
+        save_gray(public_mask_path, outputs["cloud_mask"] * 255)
         cloud_geojson_path = output_dir / "cloud_mask.geojson"
         cloud_geojson_path.write_text(
             json.dumps(self._mask_to_geojson(outputs["cloud_mask"], raster.transform), indent=2),
@@ -300,13 +319,35 @@ class CloudRemovalPipeline:
         else:
             Image.fromarray(outputs["reconstructed"]).save(recon_tif)
             Image.fromarray((outputs["confidence"] * 255.0).astype(np.uint8)).save(conf_tif)
-        return {
+        urls = {
+            "before": f"/output/{output_dir.name}/before.png",
             "reconstructed": f"/output/{output_dir.name}/reconstructed.png",
-            "confidence": f"/output/{output_dir.name}/confidence.png",
+            "reconstructed_image_url": f"/output/{output_dir.name}/reconstructed.png",
+            "confidence": f"/confidence/{output_dir.name}/confidence_heatmap.png",
+            "confidence_map_url": f"/confidence/{output_dir.name}/confidence_heatmap.png",
+            "confidence_raw_url": f"/output/{output_dir.name}/confidence.png",
             "risk": f"/output/{output_dir.name}/risk.png",
-            "cloud_mask": f"/output/{output_dir.name}/cloud_mask.png",
-            "preview": f"/output/{output_dir.name}/preview.png",
+            "risk_map_url": f"/output/{output_dir.name}/risk.png",
+            "cloud_mask": f"/masks/{output_dir.name}/cloud_mask.png",
+            "cloud_mask_url": f"/masks/{output_dir.name}/cloud_mask.png",
+            "difference": f"/output/{output_dir.name}/difference.png",
+            "difference_map_url": f"/output/{output_dir.name}/difference.png",
+            "preview": f"/previews/{output_dir.name}/preview.png",
+            "preview_image_url": f"/previews/{output_dir.name}/preview.png",
+            "thumbnail_url": f"/thumbnails/{output_dir.name}/thumbnail.png",
+            "download_urls": {
+                "recon-tiff": f"/api/download/{output_dir.name}/recon-tiff",
+                "confidence": f"/api/download/{output_dir.name}/confidence",
+                "cloudmask": f"/api/download/{output_dir.name}/cloudmask",
+                "metrics": f"/api/download/{output_dir.name}/metrics",
+                "report": f"/api/download/{output_dir.name}/report",
+                "preview": f"/api/download/{output_dir.name}/preview",
+                "before": f"/api/download/{output_dir.name}/before",
+                "difference": f"/api/download/{output_dir.name}/difference",
+                "risk": f"/api/download/{output_dir.name}/risk",
+            },
         }
+        return urls
 
     def _mask_to_geojson(self, mask: np.ndarray, transform: object | None) -> dict:
         if features is None:

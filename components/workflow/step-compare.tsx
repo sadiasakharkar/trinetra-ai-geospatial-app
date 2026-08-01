@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
 import {
   SplitSquareHorizontal,
   Layers2,
@@ -10,6 +9,7 @@ import {
   Eye,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { SafeImage } from "@/components/ui/safe-image"
 import { useWorkflow } from "./workflow-context"
 import { StepHeader, StepFooter, StepCard } from "./step-shell"
 import { Badge, MetricCard } from "@/components/dashboard/ui"
@@ -21,9 +21,9 @@ export function StepCompare() {
   const [mode, setMode] = useState<ViewMode>("slider")
   const [split, setSplit] = useState(50)
 
-  const cloudy = dataset?.thumb ?? "/images/liss-iv-cloudy.png"
-  const clear = reconResult?.output_paths?.reconstructed ?? dataset?.reconstructed ?? "/images/liss-iv-reconstructed.png"
-  const confidence = reconResult?.output_paths?.confidence
+  const cloudy = dataset?.preview_image_url ?? dataset?.thumb ?? "/images/liss-iv-cloudy.png"
+  const clear = reconResult?.reconstructed_image_url ?? reconResult?.output_paths?.reconstructed ?? dataset?.reconstructed_image_url ?? dataset?.reconstructed ?? "/images/liss-iv-reconstructed.png"
+  const confidence = reconResult?.confidence_map_url ?? reconResult?.output_paths?.confidence
 
   return (
     <div>
@@ -68,8 +68,8 @@ export function StepCompare() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <figure className="relative">
               <div className="relative aspect-square overflow-hidden rounded-lg border border-border bg-black/40">
-                <Image
-                  src={cloudy || "/placeholder.svg"}
+                <SafeImage
+                  src={cloudy}
                   alt="Original cloudy input scene"
                   fill
                   sizes="(max-width: 640px) 100vw, 40vw"
@@ -84,8 +84,8 @@ export function StepCompare() {
             </figure>
             <figure className="relative">
               <div className="relative aspect-square overflow-hidden rounded-lg border border-border bg-black/40">
-                <Image
-                  src={clear || "/placeholder.svg"}
+                <SafeImage
+                  src={clear}
                   alt="AI reconstructed cloud-free scene"
                   fill
                   sizes="(max-width: 640px) 100vw, 40vw"
@@ -101,8 +101,8 @@ export function StepCompare() {
           </div>
         ) : (
           <div className="relative mx-auto aspect-square w-full max-w-2xl overflow-hidden rounded-lg border border-border bg-black/40">
-            <Image
-              src={clear || "/placeholder.svg"}
+            <SafeImage
+              src={clear}
               alt="AI reconstructed cloud-free scene"
               fill
               sizes="(max-width: 1024px) 100vw, 60vw"
@@ -115,8 +115,8 @@ export function StepCompare() {
                   className="absolute inset-0 overflow-hidden"
                   style={{ clipPath: `inset(0 ${100 - split}% 0 0)` }}
                 >
-                  <Image
-                    src={cloudy || "/placeholder.svg"}
+                  <SafeImage
+                    src={cloudy}
                     alt="Original cloudy scene"
                     fill
                     sizes="(max-width: 1024px) 100vw, 60vw"
@@ -153,7 +153,7 @@ export function StepCompare() {
               <>
                 {confidence ? (
                   <div className="pointer-events-none absolute inset-0 opacity-60 mix-blend-screen">
-                    <Image
+                    <SafeImage
                       src={confidence}
                       alt="Confidence Heatmap"
                       fill

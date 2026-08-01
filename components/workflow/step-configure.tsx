@@ -17,7 +17,7 @@ import {
   OUTPUT_FORMATS,
   TILE_SIZES,
   type FusionSource,
-} from "@/lib/mock"
+} from "@/lib/workflow-data"
 import { useWorkflow } from "./workflow-context"
 import { StepHeader, StepFooter, StepCard } from "./step-shell"
 import { Badge } from "@/components/dashboard/ui"

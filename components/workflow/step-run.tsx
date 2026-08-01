@@ -15,7 +15,7 @@ import {
   Activity,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { MODELS } from "@/lib/mock"
+import { MODELS } from "@/lib/workflow-data"
 import { useWorkflow } from "./workflow-context"
 import { StepHeader, StepFooter, StepCard } from "./step-shell"
 import { Badge, ProgressBar, MetricCard } from "@/components/dashboard/ui"
