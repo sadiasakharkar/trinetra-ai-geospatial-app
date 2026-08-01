@@ -200,20 +200,20 @@ class CloudRemovalPipeline:
         risk = prediction["risk"][0, 0]
         model_cloud = prediction["cloud"][0, 0]
         mask = np.clip(cloud_mask.astype(np.float32), 0.0, 1.0)
-        mask = cv2.GaussianBlur(mask, (0, 0), sigmaX=2.5)
-        mask = mask[..., None]
-        blended = rgb_input * (1.0 - mask) + reconstructed * mask
+        feathered_mask = cv2.GaussianBlur(mask, (0, 0), sigmaX=2.5)
+        feathered_mask = np.clip(feathered_mask, 0.0, 1.0)
+        blend_mask = feathered_mask[..., None]
+        blended = rgb_input * (1.0 - blend_mask) + reconstructed * blend_mask
+        blended = np.where(mask[..., None] > 0, blended, rgb_input)
         blended = np.clip(blended, 0.0, 1.0)
         blended_u8 = np.clip(blended * 255.0, 0, 255).astype(np.uint8)
-        matched = np.empty_like(blended_u8)
-        for channel in range(3):
-            matched[..., channel] = cv2.equalizeHist(blended_u8[..., channel])
-        sharpened = cv2.addWeighted(blended_u8, 0.7, matched, 0.3, 0.0)
+        enhanced = cv2.addWeighted(blended_u8, 1.08, cv2.GaussianBlur(blended_u8, (0, 0), sigmaX=1.2), -0.08, 0.0)
+        sharpened = np.where(mask[..., None] > 0, enhanced, np.clip(rgb_input * 255.0, 0, 255).astype(np.uint8))
         return {
             "reconstructed": sharpened,
             "confidence": np.clip(confidence, 0.0, 1.0),
             "risk": np.clip(risk * 0.7 + model_cloud * 0.3, 0.0, 1.0),
-            "cloud_mask": (mask[..., 0] > 0.25).astype(np.uint8),
+            "cloud_mask": (mask > 0.25).astype(np.uint8),
         }
 
     def compute_metrics(self, source: np.ndarray, reconstructed: np.ndarray, cloud_mask: np.ndarray, started_at: float) -> dict[str, float]:

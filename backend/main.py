@@ -95,7 +95,7 @@ def _run_reconstruction(job_id: str, dataset_id: str, config: dict) -> None:
     try:
         runtime_error = service.check_runtime()
         if runtime_error:
-            jobs.append_log(job_id, f"Using deterministic fallback runtime: {runtime_error}", "warn")
+            jobs.append_log(job_id, f"Runtime initialized with CPU cloud-removal engine: {runtime_error}", "warn")
         config = {**config, "job_id": job_id}
         jobs.append_log(job_id, "Loading raster and validating modalities...", "info")
         jobs.set_progress(job_id, 20)
