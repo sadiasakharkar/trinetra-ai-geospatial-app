@@ -14,7 +14,7 @@ import {
   DEFAULT_CONFIG,
   type Dataset,
   type ReconConfig,
-} from "@/lib/mock"
+} from "@/lib/workflow-data"
 
 export type StepId =
   | "upload"

@@ -1,0 +1,70 @@
+{
+  "id": "TRI-SAMPLE-KRISHNA-BASIN",
+  "name": "Krishna Basin - Vijayawada Agriculture",
+  "sensor": "Synthetic LISS-IV style RGB composite",
+  "region": "Andhra Pradesh, India",
+  "acquired": "2026-05-21 11:08 IST",
+  "resolution": "5.8 m / pixel synthetic demo",
+  "area": "1,174 km2",
+  "cloudCover": 50.6,
+  "size": "0.09 MB",
+  "coords": "16.5062N / 80.6480E",
+  "preview_image_url": "/datasets/sample_02/cloudy.png",
+  "thumbnail_url": "/datasets/sample_02/thumbnail.png",
+  "cloud_mask_url": "/datasets/sample_02/cloud_mask.png",
+  "clear_reference_url": "/datasets/sample_02/clear_reference.png",
+  "historical_image_url": "/datasets/sample_02/historical.png",
+  "reconstructed_image_url": "/datasets/sample_02/clear_reference.png",
+  "dataset_json_url": "/datasets/sample_02/dataset.json",
+  "metadata_url": "/datasets/sample_02/metadata.json",
+  "thumb": "/datasets/sample_02/thumbnail.png",
+  "reconstructed": "/datasets/sample_02/clear_reference.png",
+  "sar": "/datasets/sample_02/cloud_mask.png",
+  "dem": "/datasets/sample_02/historical.png",
+  "temporal": [
+    {
+      "date": "Historical clear",
+      "img": "/datasets/sample_02/historical.png",
+      "clear": true
+    },
+    {
+      "date": "Clear reference",
+      "img": "/datasets/sample_02/clear_reference.png",
+      "clear": true
+    },
+    {
+      "date": "Current cloudy",
+      "img": "/datasets/sample_02/cloudy.png",
+      "clear": false
+    }
+  ],
+  "geographic_info": {
+    "scene": "Krishna Basin",
+    "coords": "16.5062N / 80.6480E",
+    "crs": "EPSG:4326",
+    "region": "Andhra Pradesh, India"
+  },
+  "metadata": {
+    "scene": "Krishna Basin",
+    "terrain": "agriculture",
+    "country": "India",
+    "coords": "16.5062N / 80.6480E",
+    "cloud_percentage": 50.6,
+    "resolution_px": {
+      "width": 640,
+      "height": 384
+    },
+    "bands": [
+      "red",
+      "green",
+      "blue"
+    ],
+    "license": "Synthetic demo sample generated for TRINETRA-AI repository demos"
+  },
+  "files": {
+    "primary": "cloudy.png",
+    "clear": "clear_reference.png",
+    "historical": "historical.png",
+    "mask": "cloud_mask.png"
+  }
+}

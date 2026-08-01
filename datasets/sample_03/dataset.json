@@ -1,0 +1,70 @@
+{
+  "id": "TRI-SAMPLE-BRAHMAPUTRA-FLOODPLAIN",
+  "name": "Brahmaputra Floodplain - Guwahati",
+  "sensor": "Synthetic LISS-IV style RGB composite",
+  "region": "Assam, India",
+  "acquired": "2026-04-07 09:55 IST",
+  "resolution": "5.8 m / pixel synthetic demo",
+  "area": "1,311 km2",
+  "cloudCover": 43.7,
+  "size": "0.11 MB",
+  "coords": "26.1445N / 91.7362E",
+  "preview_image_url": "/datasets/sample_03/cloudy.png",
+  "thumbnail_url": "/datasets/sample_03/thumbnail.png",
+  "cloud_mask_url": "/datasets/sample_03/cloud_mask.png",
+  "clear_reference_url": "/datasets/sample_03/clear_reference.png",
+  "historical_image_url": "/datasets/sample_03/historical.png",
+  "reconstructed_image_url": "/datasets/sample_03/clear_reference.png",
+  "dataset_json_url": "/datasets/sample_03/dataset.json",
+  "metadata_url": "/datasets/sample_03/metadata.json",
+  "thumb": "/datasets/sample_03/thumbnail.png",
+  "reconstructed": "/datasets/sample_03/clear_reference.png",
+  "sar": "/datasets/sample_03/cloud_mask.png",
+  "dem": "/datasets/sample_03/historical.png",
+  "temporal": [
+    {
+      "date": "Historical clear",
+      "img": "/datasets/sample_03/historical.png",
+      "clear": true
+    },
+    {
+      "date": "Clear reference",
+      "img": "/datasets/sample_03/clear_reference.png",
+      "clear": true
+    },
+    {
+      "date": "Current cloudy",
+      "img": "/datasets/sample_03/cloudy.png",
+      "clear": false
+    }
+  ],
+  "geographic_info": {
+    "scene": "Brahmaputra Floodplain",
+    "coords": "26.1445N / 91.7362E",
+    "crs": "EPSG:4326",
+    "region": "Assam, India"
+  },
+  "metadata": {
+    "scene": "Brahmaputra Floodplain",
+    "terrain": "floodplain",
+    "country": "India",
+    "coords": "26.1445N / 91.7362E",
+    "cloud_percentage": 43.7,
+    "resolution_px": {
+      "width": 640,
+      "height": 384
+    },
+    "bands": [
+      "red",
+      "green",
+      "blue"
+    ],
+    "license": "Synthetic demo sample generated for TRINETRA-AI repository demos"
+  },
+  "files": {
+    "primary": "cloudy.png",
+    "clear": "clear_reference.png",
+    "historical": "historical.png",
+    "mask": "cloud_mask.png"
+  }
+}

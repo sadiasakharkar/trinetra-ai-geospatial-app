@@ -1,0 +1,17 @@
+{
+  "scene": "Brahmaputra Floodplain",
+  "terrain": "floodplain",
+  "country": "India",
+  "coords": "26.1445N / 91.7362E",
+  "cloud_percentage": 43.7,
+  "resolution_px": {
+    "width": 640,
+    "height": 384
+  },
+  "bands": [
+    "red",
+    "green",
+    "blue"
+  ],
+  "license": "Synthetic demo sample generated for TRINETRA-AI repository demos"
+}

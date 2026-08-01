@@ -17,6 +17,26 @@ const nextConfig = {
         source: '/uploads/:path*',
         destination: `${process.env.BACKEND_API_URL || 'http://127.0.0.1:8000'}/uploads/:path*`,
       },
+      {
+        source: '/datasets/:path*',
+        destination: `${process.env.BACKEND_API_URL || 'http://127.0.0.1:8000'}/datasets/:path*`,
+      },
+      {
+        source: '/previews/:path*',
+        destination: `${process.env.BACKEND_API_URL || 'http://127.0.0.1:8000'}/previews/:path*`,
+      },
+      {
+        source: '/thumbnails/:path*',
+        destination: `${process.env.BACKEND_API_URL || 'http://127.0.0.1:8000'}/thumbnails/:path*`,
+      },
+      {
+        source: '/confidence/:path*',
+        destination: `${process.env.BACKEND_API_URL || 'http://127.0.0.1:8000'}/confidence/:path*`,
+      },
+      {
+        source: '/masks/:path*',
+        destination: `${process.env.BACKEND_API_URL || 'http://127.0.0.1:8000'}/masks/:path*`,
+      },
     ]
   },
 }

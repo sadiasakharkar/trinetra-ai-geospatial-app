@@ -1,0 +1,17 @@
+{
+  "scene": "Rajasthan Desert",
+  "terrain": "desert",
+  "country": "India",
+  "coords": "26.9157N / 70.9083E",
+  "cloud_percentage": 27.1,
+  "resolution_px": {
+    "width": 640,
+    "height": 384
+  },
+  "bands": [
+    "red",
+    "green",
+    "blue"
+  ],
+  "license": "Synthetic demo sample generated for TRINETRA-AI repository demos"
+}

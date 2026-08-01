@@ -1,0 +1,70 @@
+{
+  "id": "TRI-SAMPLE-RAJASTHAN-DESERT",
+  "name": "Rajasthan Desert - Thar Dunes",
+  "sensor": "Synthetic LISS-IV style RGB composite",
+  "region": "Rajasthan, India",
+  "acquired": "2026-03-29 11:31 IST",
+  "resolution": "5.8 m / pixel synthetic demo",
+  "area": "1,722 km2",
+  "cloudCover": 27.1,
+  "size": "0.15 MB",
+  "coords": "26.9157N / 70.9083E",
+  "preview_image_url": "/datasets/sample_06/cloudy.png",
+  "thumbnail_url": "/datasets/sample_06/thumbnail.png",
+  "cloud_mask_url": "/datasets/sample_06/cloud_mask.png",
+  "clear_reference_url": "/datasets/sample_06/clear_reference.png",
+  "historical_image_url": "/datasets/sample_06/historical.png",
+  "reconstructed_image_url": "/datasets/sample_06/clear_reference.png",
+  "dataset_json_url": "/datasets/sample_06/dataset.json",
+  "metadata_url": "/datasets/sample_06/metadata.json",
+  "thumb": "/datasets/sample_06/thumbnail.png",
+  "reconstructed": "/datasets/sample_06/clear_reference.png",
+  "sar": "/datasets/sample_06/cloud_mask.png",
+  "dem": "/datasets/sample_06/historical.png",
+  "temporal": [
+    {
+      "date": "Historical clear",
+      "img": "/datasets/sample_06/historical.png",
+      "clear": true
+    },
+    {
+      "date": "Clear reference",
+      "img": "/datasets/sample_06/clear_reference.png",
+      "clear": true
+    },
+    {
+      "date": "Current cloudy",
+      "img": "/datasets/sample_06/cloudy.png",
+      "clear": false
+    }
+  ],
+  "geographic_info": {
+    "scene": "Rajasthan Desert",
+    "coords": "26.9157N / 70.9083E",
+    "crs": "EPSG:4326",
+    "region": "Rajasthan, India"
+  },
+  "metadata": {
+    "scene": "Rajasthan Desert",
+    "terrain": "desert",
+    "country": "India",
+    "coords": "26.9157N / 70.9083E",
+    "cloud_percentage": 27.1,
+    "resolution_px": {
+      "width": 640,
+      "height": 384
+    },
+    "bands": [
+      "red",
+      "green",
+      "blue"
+    ],
+    "license": "Synthetic demo sample generated for TRINETRA-AI repository demos"
+  },
+  "files": {
+    "primary": "cloudy.png",
+    "clear": "clear_reference.png",
+    "historical": "historical.png",
+    "mask": "cloud_mask.png"
+  }
+}

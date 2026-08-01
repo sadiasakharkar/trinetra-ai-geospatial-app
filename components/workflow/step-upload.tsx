@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import {
   UploadCloud,
   CloudRain,
@@ -12,6 +11,7 @@ import {
   X,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { SafeImage } from "@/components/ui/safe-image"
 import { useWorkflow } from "./workflow-context"
 import { StepHeader, StepFooter, StepCard } from "./step-shell"
 import { Badge, ProgressBar } from "@/components/dashboard/ui"
@@ -100,8 +100,8 @@ export function StepUpload() {
                   )}
                 >
                   <div className="relative aspect-video w-full overflow-hidden bg-black/40">
-                    <Image
-                      src={d.thumb || "/placeholder.svg"}
+                    <SafeImage
+                      src={d.thumbnail_url || d.preview_image_url || d.thumb}
                       alt={`Preview of ${d.name}`}
                       fill
                       sizes="(max-width: 640px) 100vw, 33vw"

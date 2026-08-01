@@ -92,7 +92,7 @@ export function FusionPanel() {
               <div key={t.date} className="flex flex-col items-center gap-2">
                 <div className="relative size-full aspect-square overflow-hidden rounded-md border border-border">
                   <Image
-                    src={t.img || "/placeholder.svg"}
+                    src={t.img || "/images/liss-iv-cloudy.png"}
                     alt={`Temporal reference scene from ${t.date}`}
                     fill
                     sizes="80px"

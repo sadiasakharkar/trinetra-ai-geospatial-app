@@ -1,0 +1,70 @@
+{
+  "id": "TRI-SAMPLE-GANGA-DELTA",
+  "name": "Ganga Delta - Sundarbans Sector",
+  "sensor": "Synthetic LISS-IV style RGB composite",
+  "region": "West Bengal, India",
+  "acquired": "2026-06-18 10:42 IST",
+  "resolution": "5.8 m / pixel synthetic demo",
+  "area": "1,037 km2",
+  "cloudCover": 38.4,
+  "size": "0.1 MB",
+  "coords": "22.0470N / 88.7470E",
+  "preview_image_url": "/datasets/sample_01/cloudy.png",
+  "thumbnail_url": "/datasets/sample_01/thumbnail.png",
+  "cloud_mask_url": "/datasets/sample_01/cloud_mask.png",
+  "clear_reference_url": "/datasets/sample_01/clear_reference.png",
+  "historical_image_url": "/datasets/sample_01/historical.png",
+  "reconstructed_image_url": "/datasets/sample_01/clear_reference.png",
+  "dataset_json_url": "/datasets/sample_01/dataset.json",
+  "metadata_url": "/datasets/sample_01/metadata.json",
+  "thumb": "/datasets/sample_01/thumbnail.png",
+  "reconstructed": "/datasets/sample_01/clear_reference.png",
+  "sar": "/datasets/sample_01/cloud_mask.png",
+  "dem": "/datasets/sample_01/historical.png",
+  "temporal": [
+    {
+      "date": "Historical clear",
+      "img": "/datasets/sample_01/historical.png",
+      "clear": true
+    },
+    {
+      "date": "Clear reference",
+      "img": "/datasets/sample_01/clear_reference.png",
+      "clear": true
+    },
+    {
+      "date": "Current cloudy",
+      "img": "/datasets/sample_01/cloudy.png",
+      "clear": false
+    }
+  ],
+  "geographic_info": {
+    "scene": "Ganga Delta",
+    "coords": "22.0470N / 88.7470E",
+    "crs": "EPSG:4326",
+    "region": "West Bengal, India"
+  },
+  "metadata": {
+    "scene": "Ganga Delta",
+    "terrain": "river",
+    "country": "India",
+    "coords": "22.0470N / 88.7470E",
+    "cloud_percentage": 38.4,
+    "resolution_px": {
+      "width": 640,
+      "height": 384
+    },
+    "bands": [
+      "red",
+      "green",
+      "blue"
+    ],
+    "license": "Synthetic demo sample generated for TRINETRA-AI repository demos"
+  },
+  "files": {
+    "primary": "cloudy.png",
+    "clear": "clear_reference.png",
+    "historical": "historical.png",
+    "mask": "cloud_mask.png"
+  }
+}
