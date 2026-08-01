@@ -56,7 +56,6 @@ export function StepDownload() {
   const handleDownloadAll = async () => {
     for (const a of DOWNLOADS) {
       if (!downloaded.includes(a.id)) {
-        // eslint-disable-next-line no-await-in-loop
         await handleDownload(a)
       }
     }
