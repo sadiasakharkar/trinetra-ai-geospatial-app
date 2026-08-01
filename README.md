@@ -148,7 +148,7 @@ docker run -p 8000:8000 --env-file .env trinetra-ai
 
 ### Vercel
 
-The existing frontend deployment can remain on Vercel as long as `/api` traffic is routed to the backend service.
+Vercel should deploy the Next.js frontend only. The FastAPI/ML backend depends on native geospatial and ML packages that exceed Vercel Function limits, so deploy it separately with Render or Docker and set `BACKEND_API_URL` in Vercel Project Settings to that backend origin.
 
 ## Testing
 

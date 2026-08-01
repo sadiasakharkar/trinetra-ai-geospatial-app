@@ -158,7 +158,13 @@ export function DonutChart({
   const cx = size / 2
   const cy = size / 2
   const circ = 2 * Math.PI * r
-  let offset = 0
+  const segments = data.reduce<
+    ({ label: string; pct: number; tone: "primary" | "green" | "accent" } & { len: number; offset: number })[]
+  >((acc, d) => {
+    const len = (d.pct / 100) * circ
+    const offset = acc.reduce((sum, segment) => sum + segment.len, 0)
+    return [...acc, { ...d, len, offset }]
+  }, [])
   const toneClass = {
     primary: "stroke-primary",
     green: "stroke-chart-3",
@@ -173,24 +179,19 @@ export function DonutChart({
         role="img"
         aria-label="Pixel classification breakdown"
       >
-        {data.map((d) => {
-          const len = (d.pct / 100) * circ
-          const seg = (
-            <circle
-              key={d.label}
-              cx={cx}
-              cy={cy}
-              r={r}
-              fill="none"
-              strokeWidth={14}
-              className={toneClass[d.tone]}
-              strokeDasharray={`${len} ${circ - len}`}
-              strokeDashoffset={-offset}
-            />
-          )
-          offset += len
-          return seg
-        })}
+        {segments.map((d) => (
+          <circle
+            key={d.label}
+            cx={cx}
+            cy={cy}
+            r={r}
+            fill="none"
+            strokeWidth={14}
+            className={toneClass[d.tone]}
+            strokeDasharray={`${d.len} ${circ - d.len}`}
+            strokeDashoffset={-d.offset}
+          />
+        ))}
       </svg>
       <div className="flex flex-col gap-2">
         {data.map((d) => (
