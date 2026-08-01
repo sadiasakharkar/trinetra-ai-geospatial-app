@@ -4,6 +4,9 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
+# Bundled SpA-GAN RICE1 ONNX (exported from Penn000/SpA-GAN_for_cloud_removal weights).
+DEFAULT_SPAGAN_ONNX_SHA256 = ""
+
 
 @dataclass(slots=True)
 class Settings:
@@ -18,8 +21,13 @@ class Settings:
     mask_dir: Path = field(init=False)
     cache_dir: Path = field(init=False)
     weights_dir: Path = field(init=False)
-    model_url: str | None = field(default_factory=lambda: os.getenv("TRINETRA_MODEL_URL"))
-    model_sha256: str | None = field(default_factory=lambda: os.getenv("TRINETRA_MODEL_SHA256"))
+    model_url: str | None = field(default_factory=lambda: os.getenv("TRINETRA_MODEL_URL") or None)
+    model_sha256: str | None = field(
+        default_factory=lambda: os.getenv("TRINETRA_MODEL_SHA256") or DEFAULT_SPAGAN_ONNX_SHA256 or None
+    )
+    attention_onnx_url: str | None = field(default_factory=lambda: os.getenv("TRINETRA_ATTENTION_ONNX_URL"))
+    attention_onnx_sha256: str | None = field(default_factory=lambda: os.getenv("TRINETRA_ATTENTION_ONNX_SHA256"))
+    spagan_onnx_name: str = field(default_factory=lambda: os.getenv("TRINETRA_SPAGAN_ONNX_NAME", "spagan_rice1.onnx"))
     torchscript_name: str = field(default_factory=lambda: os.getenv("TRINETRA_TORCHSCRIPT_NAME", "attention_resunet.ts"))
     onnx_name: str = field(default_factory=lambda: os.getenv("TRINETRA_ONNX_NAME", "attention_resunet.onnx"))
     max_patch_size: int = field(default_factory=lambda: int(os.getenv("TRINETRA_MAX_PATCH", "512")))

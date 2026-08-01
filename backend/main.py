@@ -62,7 +62,7 @@ def model_info() -> dict:
         raise HTTPException(status_code=503, detail=error)
     info = service.engine.info
     return {
-        "name": "AttentionResidualUNet",
+        "name": info.model,
         "engine": info.name,
         "device": info.device,
         "precision": info.precision,

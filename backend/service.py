@@ -22,7 +22,7 @@ from backend.datasets import dataset_path_from_url, find_dataset, load_sample_da
 from backend.logging_utils import get_logger
 from backend.media import public_url, save_gray, save_rgb, save_thumbnail
 from backend.ml.inference import InferenceEngine
-from backend.ml.weights import WeightManager
+from backend.ml.weights import WeightManager, WeightSpec
 from backend.pipeline import CloudRemovalPipeline, PipelineError
 
 
@@ -30,7 +30,18 @@ class TrinetraService:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.logger = get_logger(__name__)
-        self.weight_manager = WeightManager(settings.weights_dir, settings.model_url, settings.model_sha256)
+        catalog: dict[str, WeightSpec] = {}
+        if settings.model_url:
+            catalog[settings.spagan_onnx_name] = WeightSpec(
+                url=settings.model_url,
+                sha256=settings.model_sha256,
+            )
+        if settings.attention_onnx_url:
+            catalog[settings.onnx_name] = WeightSpec(
+                url=settings.attention_onnx_url,
+                sha256=settings.attention_onnx_sha256,
+            )
+        self.weight_manager = WeightManager(settings.weights_dir, catalog)
         self._engine: InferenceEngine | None = None
         self._pipeline: CloudRemovalPipeline | None = None
         self._load_error: str | None = None
@@ -57,9 +68,18 @@ class TrinetraService:
             if self._engine is not None and self._pipeline is not None:
                 return
             try:
+                spagan_path = self.weight_manager.ensure(self.settings.spagan_onnx_name)
+                if spagan_path is None:
+                    bundled = self.settings.weights_dir / self.settings.spagan_onnx_name
+                    if bundled.exists():
+                        spagan_path = bundled
                 torchscript_path = self.weight_manager.ensure(self.settings.torchscript_name)
                 onnx_path = self.weight_manager.ensure(self.settings.onnx_name)
-                self._engine = InferenceEngine(torchscript_path=torchscript_path, onnx_path=onnx_path)
+                self._engine = InferenceEngine(
+                    spagan_onnx_path=spagan_path,
+                    torchscript_path=torchscript_path,
+                    onnx_path=onnx_path,
+                )
                 self._pipeline = CloudRemovalPipeline(self.settings, self._engine)
                 self._load_error = None
                 self.logger.info("Inference runtime initialized with engine=%s", self._engine.info.name)
