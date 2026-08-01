@@ -44,15 +44,12 @@ export function StepRun() {
   const model = MODELS.find((m) => m.id === config.model)
   const done = status === "complete"
 
-  // auto-scroll logs
   useEffect(() => {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight
   }, [logs])
 
   const totalTiles = 256
   const completedTiles = Math.round((progress / 100) * totalTiles)
-
-  // tile grid (16x16 = 256) state derived from progress
   const tiles = useMemo(() => Array.from({ length: totalTiles }), [])
 
   const eta = useMemo(() => {
@@ -75,7 +72,6 @@ export function StepRun() {
         icon={<Activity className="size-5 text-primary" aria-hidden="true" />}
       />
 
-      {/* Controls */}
       <StepCard className="mb-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <div className="flex gap-2">
@@ -136,7 +132,6 @@ export function StepRun() {
       </StepCard>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        {/* Tile grid */}
         <StepCard className="lg:col-span-1">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -181,18 +176,17 @@ export function StepRun() {
             </div>
           </div>
           <p className="mt-2 text-center text-[11px] text-muted-foreground">
-            {config.tileSize}px tiles · {model?.name}
+            {config.tileSize}px tiles - {model?.name}
           </p>
         </StepCard>
 
-        {/* Log stream */}
         <StepCard className="lg:col-span-2">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
               <Terminal className="size-4 text-primary" /> Pipeline Log
             </h2>
             <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Zap className="size-3.5 text-primary" /> 4× A100
+              <Zap className="size-3.5 text-primary" /> {model?.name ?? "Active model"}
             </span>
           </div>
           <div
@@ -200,9 +194,7 @@ export function StepRun() {
             className="h-64 overflow-y-auto rounded-lg border border-border bg-black/50 p-3 font-mono text-xs leading-relaxed"
           >
             {logs.length === 0 ? (
-              <p className="text-muted-foreground/60">
-                $ awaiting job start…
-              </p>
+              <p className="text-muted-foreground/60">$ awaiting job start...</p>
             ) : (
               logs.map((l, i) => (
                 <div key={i} className="flex gap-2">
@@ -210,7 +202,7 @@ export function StepRun() {
                     {l.time}
                   </span>
                   <span className={LEVEL_STYLES[l.level]}>
-                    {l.level === "ok" ? "✓ " : l.level === "warn" ? "! " : "› "}
+                    {l.level === "ok" ? "OK " : l.level === "warn" ? "! " : "> "}
                     {l.text}
                   </span>
                 </div>
@@ -219,15 +211,15 @@ export function StepRun() {
             {status === "running" ? (
               <div className="mt-1 flex items-center gap-2 text-primary">
                 <Loader2 className="size-3 animate-spin" />
-                <span className="animate-pulse">processing…</span>
+                <span className="animate-pulse">processing...</span>
               </div>
             ) : null}
           </div>
 
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             <MetricCard label="Completed" value={`${completedTiles}`} sub="tiles" tone="green" />
-            <MetricCard label="Throughput" value={status === "running" ? "7.7" : "0"} unit="t/s" />
-            <MetricCard label="GPU Util" value={status === "running" ? "78" : "4"} unit="%" tone="primary" />
+            <MetricCard label="Throughput" value={status === "running" ? "Live" : "Idle"} />
+            <MetricCard label="Engine" value={status === "running" ? "Active" : "Pending"} tone="primary" />
             <MetricCard
               label="Status"
               value={done ? "Done" : status === "running" ? "Live" : "Idle"}
@@ -246,7 +238,7 @@ export function StepRun() {
                 Reconstruction finished successfully
               </p>
               <p className="text-xs text-muted-foreground">
-                256 tiles reconstructed · validation metrics computed · ready to review
+                Tile reconstruction completed and backend metrics are ready to review.
               </p>
             </div>
           </div>

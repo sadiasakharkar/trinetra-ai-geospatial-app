@@ -1,169 +1,164 @@
-# TRINETRA-AI: Reliability-Aware Geospatial Earth Observation Reconstruction Framework
+# TRINETRA-AI
 
-TRINETRA-AI is a specialized, reliability-aware Earth observation reconstruction framework engineered for IRS Resourcesat-2A LISS-IV multispectral satellite imagery. By fusing optical, Synthetic Aperture Radar (SAR), digital elevation model (DEM), and historical clear temporal references, TRINETRA-AI reconstructs cloud-contaminated regions using evidence-constrained generative algorithms, producing analysis-ready, GIS-compatible output products.
+TRINETRA-AI is a satellite cloud-reconstruction application with a completed Next.js workflow and a FastAPI backend. This repository now contains a production-oriented backend structure for multimodal cloud removal with an `AttentionResidualUNet`, exported inference runtimes, upload and job orchestration, training utilities, and downloadable geospatial artifacts.
 
----
+## Current Architecture
 
-## The Challenge & Our Innovation
+- Frontend: Next.js workflow preserving `Upload -> Configure -> Run -> Validation -> Compare -> Download`
+- Backend API: FastAPI endpoints for upload, job start, status, result, metrics, health, model information, cancellation, and downloads
+- ML model: `AttentionResidualUNet` in `backend/ml/model.py`
+- Inference runtime: TorchScript or ONNX Runtime with CPU fallback in `backend/ml/inference.py`
+- Processing pipeline: upload validation, raster loading, normalization, cloud detection, sliding-window inference, post-processing, and artifact writing in `backend/pipeline.py`
+- Training stack: dataset, augmentations, losses, validation, checkpointing, resume support, TensorBoard logging, and export scripts under `backend/training`
 
-### The Research Gap
-1. **LISS-IV Specificity**: Most cloud removal networks are trained for Sentinel-2 or Landsat-8 imagery, failing to account for the unique high spatial resolution (5.8 m/pixel) and 3-band spectral characteristics of LISS-IV.
-2. **Dynamic Change Vulnerability**: Traditional temporal inpainting techniques often replace clouds using outdated historical pixels, creating severe errors in dynamically changing landscapes (e.g., active floods, rapid urban expansion, or landslides).
-3. **Black-box Generative Models**: Standard GAN or Diffusion-based cloud removal models are prone to hallucinating surface details, creating false features that lack scientific validation.
+## Repository Layout
 
-### Our Solution: Beyond Simple Cloud Removal
-TRINETRA-AI implements **Evidence-Constrained Multi-modal Reconstruction**:
-- **SAR-Based Change Detection**: Cloud-penetrating radar from Sentinel-1 checks for land-cover changes between the target date and historical templates, identifying regions where historical data is outdated or unreliable.
-- **Terrain-Aware Shadow Correction**: Integrates CartoDEM v3 data to adjust for terrain shadow cast in complex, mountainous topologies.
-- **PyTorch Neural Fusion**: Employs a multi-channel deep convolutional network (`TrinetraUNet`) that integrates radar backscatter (VV+VH), elevation gradients, and temporal spectra to guide generative inpainting.
-- **Explainability Heatmaps**: Generates per-pixel confidence scores and hallucination risk indices to ensure operational reliability.
-
----
-
-## Technology Stack
-
-| Layer | Component | Description |
-| :--- | :--- | :--- |
-| **Frontend** | React, TypeScript, Tailwind CSS | High-performance user interface with interactive satellite visualizers, comparisons, and live logs. |
-| **Backend API** | FastAPI (Python), Uvicorn | High-throughput, async-native API orchestration for model serving. |
-| **AI Framework** | PyTorch (`torch`, `torchvision`) | Custom `TrinetraUNet` model executing multi-modal sensor fusion. |
-| **Geospatial Processing** | OpenCV, NumPy, scikit-image | Edge-preserving blending, cloud/shadow masking, and scientific quality metrics calculations. |
-
----
-
-## System Architecture
-
-The following block illustrates the end-to-end data flow from client-side uploads, reverse-proxy forwarding, background worker scheduling, and PyTorch model execution down to disk serialization and asset rendering:
-
-```mermaid
-graph TD
-    subgraph Frontend [Next.js React Frontend]
-        UI[Workflow Stepper UI]
-        Ctx[Workflow Context State]
-    end
-
-    subgraph Backend [FastAPI Python Server]
-        API[main.py: REST Endpoints]
-        Pipeline[reconstructor.py: Processing Engine]
-        Model[model.py: PyTorch TrinetraUNet]
-    end
-
-    subgraph Storage [Public Directory]
-        Assets[Sample Images & Uploads]
-        Outputs[Processed PNGs, TIFFs & JSONs]
-    end
-
-    UI <--> Ctx
-    Ctx -- Proxy Rewrite /api --> API
-    API -- Background Worker --> Pipeline
-    Pipeline -- Multi-modal Input --> Model
-    Model -- Forward Pass --> Pipeline
-    Pipeline -- Saves --> Outputs
-    Outputs -. Renders in .-> UI
+```text
+backend/
+  main.py
+  config.py
+  service.py
+  pipeline.py
+  ml/
+  training/
+  tests/
+components/
+app/
+lib/
+public/
 ```
 
----
+## Environment Variables
 
-## Model Architecture & Technical Formulation
+Copy `.env.example` and configure:
 
-### 1. Cloud Masking & Segmenting ($\mathbf{M}\_{cloud}$)
-Before neural processing, the cloudy region is segmented dynamically. An adaptive thresholding is calculated by minimizing the intra-class variance of the gray-scale intensity $\mathbf{I}\_{gray}$:
-$$\sigma\_w^2(t) = \omega\_0(t)\sigma\_0^2(t) + \omega\_1(t)\sigma\_1^2(t)$$
-Where $\omega\_0(t)$ and $\omega\_1(t)$ are the probabilities of the two classes separated by a threshold $t$, and $\sigma\_0^2(t)$, $\sigma\_1^2(t)$ are their respective variances. 
+- `TRINETRA_MODEL_URL`
+- `TRINETRA_MODEL_SHA256`
+- `TRINETRA_TORCHSCRIPT_NAME`
+- `TRINETRA_ONNX_NAME`
+- `TRINETRA_MAX_PATCH`
+- `TRINETRA_DEFAULT_TILE`
+- `TRINETRA_TILE_OVERLAP`
+- `TRINETRA_BATCH_SIZE`
+- `TRINETRA_NUM_WORKERS`
+- `TRINETRA_MAX_UPLOAD_MB`
+- `TRINETRA_LOG_LEVEL`
 
-This is followed by morphological opening and closing operators to fill cloud interior holes and segment shadow cast regions:
-$$\mathbf{M}\_{cloud} = (\mathbf{M}\_{raw} \bullet \mathbf{B}) \circ \mathbf{B}$$
-where $\mathbf{B}$ is a structuring element.
-
-### 2. Multi-modal Neural Fusion (`TrinetraUNet`)
-The deep neural network consists of an 8-channel input stack feeding a contracting-expanding encoder-decoder network with skip connections:
-$$\mathbf{X}\_{input} = [\mathbf{I}\_{cloudy} (3\text{ch}), \mathbf{I}\_{sar} (1\text{ch}), \mathbf{I}\_{dem} (1\text{ch}), \mathbf{I}\_{historical} (3\text{ch})]$$
-
-The output layer branches into three distinct headers:
-1. **Reconstructed Scene** (3 channels, RGB normalized)
-2. **Confidence Heatmap** (1 channel, probability [0, 1])
-3. **Hallucination Risk Matrix** (1 channel, risk index [0, 1])
-
-The training is governed by a combined MSE loss and structural similarity constraint, where the evidence stack is injected at bottleneck latents:
-$$\mathcal{L}\_{\text{DiffCR}} = \mathbb{E}\_{\mathbf{x}\_0, \mathbf{y}, \boldsymbol{\epsilon}, t} \left[ \|\boldsymbol{\epsilon} - \boldsymbol{\epsilon}\_\theta(\mathbf{x}\_t, t, \mathbf{C}\_{\text{evidence}})\|^2 \right]$$
-Where $\mathbf{C}\_{\text{evidence}} = [\mathbf{I}\_{sar}, \mathbf{I}\_{dem}, \mathbf{I}\_{historical}]$ represents the conditioning tensors.
-
-### 3. Edge-Preserving Feathered Blending
-To prevent seam lines and boundaries at the edge of the reconstructed regions, the final output image $\mathbf{I}\_{final}$ is created using a spatial weighting function:
-$$\mathbf{I}\_{final}(x,y) = (1 - \mathcal{F}\_{\sigma}(\mathbf{M}\_{cloud})(x,y)) \cdot \mathbf{I}\_{cloudy}(x,y) + \mathcal{F}\_{\sigma}(\mathbf{M}\_{cloud})(x,y) \cdot \mathbf{I}\_{reconstructed}(x,y)$$
-where $\mathcal{F}\_{\sigma}$ represents a Gaussian smoothing operator with kernel standard deviation $\sigma$.
-
----
-
-## Scientific Quality Benchmarks
-
-Validated against reference ground-truth cloud-free acquisitions, the pipeline achieves the following validation performance scores:
-
-### Peak Signal-to-Noise Ratio (PSNR)
-$$\text{PSNR} = 10 \cdot \log\_{10} \left( \frac{\text{MAX}\_I^2}{\text{MSE}} \right)$$
-* **Benchmark Achieved**: **34.8 dB** (Target benchmark: $\ge 30\text{ dB}$)
-
-### Structural Similarity Index (SSIM)
-$$\text{SSIM}(x,y) = \frac{(2\mu\_x\mu\_y + C\_1)(2\sigma\_{xy} + C\_2)}{(\mu\_x^2 + \mu\_y^2 + C\_1)(\sigma\_x^2 + \sigma\_y^2 + C\_2)}$$
-* **Benchmark Achieved**: **0.931** (Demonstrates high structural fidelity)
-
-### Spectral Angle Mapper (SAM)
-$$\theta(\mathbf{s}\_i, \hat{\mathbf{s}}\_i) = \arccos \left( \frac{\mathbf{s}\_i \cdot \hat{\mathbf{s}}\_i}{\|\mathbf{s}\_i\|\_2 \|\hat{\mathbf{s}}\_i\|\_2} \right)$$
-* **Benchmark Achieved**: **3.42°** (Reflects minimal spectral distortion)
-
-### NDVI Index Preservation
-$$\text{NDVI} = \frac{\mathbf{B}\_{\text{NIR}} - \mathbf{B}\_{\text{Red}}}{\mathbf{B}\_{\text{NIR}} + \mathbf{B}\_{\text{Red}}}$$
-* **Benchmark Achieved**: **97.6%** (Ensures agricultural and vegetation metrics remain scientifically valid)
-
----
-
-## Dataset Specifications
-
-TRINETRA-AI supports ingestion of standard multi-sensor raster bundles:
-1. **LISS-IV Optical**: IRS Resourcesat-2A LISS-IV imagery (5.8m resolution, Green, Red, and NIR bands).
-2. **Sentinel-1 SAR**: Cloud-penetrating C-band Synthetic Aperture Radar (VV and VH backscatter channels).
-3. **CartoDEM v3**: 30m resolution Digital Elevation Model from ISRO's Cartosat-1, providing elevation, slope, and aspect constraints.
-4. **Historical Clear Templates**: Prior cloud-free acquisitions of the same Area of Interest (AOI) to provide temporal context.
-
----
-
-## Development & Quick Start
+## Local Development
 
 ### Prerequisites
-- Node.js (v18+) & `pnpm`
-- Python (3.10 to 3.12) & `pip`
 
-### Installation & Launch
+- Node.js 18+
+- pnpm
+- Python 3.10 to 3.12
 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/sadiasakharkar/trinetra-ai-geospatial-app.git
-   cd trinetra-ai-geospatial-app
-   ```
+### Install
 
-2. **Install Node.js Frontend Dependencies**:
-   ```bash
-   pnpm install
-   ```
-
-3. **Install Python Backend Dependencies**:
-   ```bash
-   pip3 install -r backend/requirements.txt
-   ```
-
-4. **Launch Joint Development Environment**:
-   TRINETRA-AI has a preconfigured joint startup script. Running this launches both the Next.js frontend (port 3000) and the FastAPI backend (port 8000) concurrently:
-   ```bash
-   pnpm dev
-   ```
-   Open [http://localhost:3000](http://localhost:3000) in your browser.
-
----
-
-## Integration Testing
-
-To verify the endpoints, PyTorch tensor mapping, image masking, and output GeoTIFF/GeoJSON exports, run the integration test suite:
 ```bash
-python3 scratch/test_integration.py
+pnpm install
+pip install -r backend/requirements.txt
 ```
-This tests both preset acquisitions and custom user uploads, executing the pipeline end-to-end and verifying all outputs are downloadable and valid.
+
+### Run
+
+```bash
+pnpm dev
+```
+
+The frontend runs on port `3000` and proxies backend requests to the FastAPI service on port `8000`.
+
+## Training
+
+The training pipeline expects JSON manifests with records containing:
+
+- `cloudy`
+- `target`
+- `historical`
+- `sar`
+- `dem`
+- `cloud_mask`
+
+Run training:
+
+```bash
+python -m backend.training.train --train-manifest path/to/train.json --val-manifest path/to/val.json --output-dir work/checkpoints
+```
+
+Resume training:
+
+```bash
+python -m backend.training.train --train-manifest path/to/train.json --val-manifest path/to/val.json --output-dir work/checkpoints --resume-from work/checkpoints/last.ckpt
+```
+
+Export TorchScript and ONNX weights:
+
+```bash
+python -m backend.training.export --checkpoint work/checkpoints/best.ckpt --output-dir work/exports
+```
+
+## Inference
+
+On startup, the backend lazily initializes the inference runtime:
+
+1. Reuse cached TorchScript or ONNX weights if present.
+2. Download weights from `TRINETRA_MODEL_URL` if configured.
+3. Prefer ONNX Runtime when available.
+4. Fall back to TorchScript on CPU or GPU.
+
+If exported weights are unavailable, the backend reports a degraded health state instead of silently running an untrained model.
+
+## API Endpoints
+
+- `GET /api/health`
+- `GET /api/model-info`
+- `GET /api/datasets`
+- `POST /api/upload`
+- `POST /api/reconstruct/start`
+- `GET /api/reconstruct/status/{job_id}`
+- `POST /api/reconstruct/cancel/{job_id}`
+- `GET /api/reconstruct/result/{job_id}`
+- `GET /api/metrics/{job_id}`
+- `GET /api/download/{job_id}/{artifact_id}`
+
+## Downloads
+
+Completed jobs generate:
+
+- `reconstructed_scene.tif`
+- `confidence_map.tif`
+- `cloud_mask.geojson`
+- `metrics.json`
+- `processing_report.pdf`
+- `preview.png`
+
+## Deployment
+
+### Render
+
+The repository includes `render.yaml`. Set the model URL and checksum as environment variables and deploy the backend service.
+
+### Docker
+
+A backend-only `Dockerfile` is included:
+
+```bash
+docker build -t trinetra-ai .
+docker run -p 8000:8000 --env-file .env trinetra-ai
+```
+
+### Vercel
+
+The existing frontend deployment can remain on Vercel as long as `/api` traffic is routed to the backend service.
+
+## Testing
+
+Current automated coverage is minimal and lives in `backend/tests`. Expand this before release with API, integration, and large-raster tests in an environment that has the full ML and geospatial stack installed.
+
+## Important Production Note
+
+This repository structure is much closer to production than the original prototype, but a real deployment still requires:
+
+- exported trained weights
+- installed ML and geospatial dependencies
+- integration tests executed in a full runtime
+- operational validation against real satellite scenes
