@@ -1,70 +1,73 @@
 {
-  "id": "TRI-SAMPLE-WESTERN-GHATS",
-  "name": "Western Ghats - Nilgiri Forest",
-  "sensor": "Synthetic LISS-IV style RGB composite",
-  "region": "Tamil Nadu / Kerala, India",
-  "acquired": "2026-07-02 09:48 IST",
-  "resolution": "5.8 m / pixel synthetic demo",
-  "area": "1,585 km2",
-  "cloudCover": 47.2,
-  "size": "0.13 MB",
-  "coords": "11.4064N / 76.6932E",
+  "id": "sample_05",
+  "name": "Rajasthan Thar Solar Complex",
+  "sensor": "Landsat 8 OLI",
+  "location": "Bhadla, Rajasthan Desert",
+  "coords": "27.5 N, 71.9 E",
+  "resolution": "30 m Landsat natural-color composite",
+  "captureDate": "2022-01-26",
+  "cloudCover": 51.8,
+  "status": "Ready",
+  "area": "Bhadla Solar Park and arid desert infrastructure",
   "preview_image_url": "/datasets/sample_05/cloudy.png",
   "thumbnail_url": "/datasets/sample_05/thumbnail.png",
   "cloud_mask_url": "/datasets/sample_05/cloud_mask.png",
   "clear_reference_url": "/datasets/sample_05/clear_reference.png",
   "historical_image_url": "/datasets/sample_05/historical.png",
-  "reconstructed_image_url": "/datasets/sample_05/clear_reference.png",
+  "reconstructed_image_url": "/datasets/sample_05/reconstructed.png",
+  "confidence_map_url": "/datasets/sample_05/confidence_heatmap.png",
+  "difference_map_url": "/datasets/sample_05/difference_map.png",
   "dataset_json_url": "/datasets/sample_05/dataset.json",
   "metadata_url": "/datasets/sample_05/metadata.json",
   "thumb": "/datasets/sample_05/thumbnail.png",
-  "reconstructed": "/datasets/sample_05/clear_reference.png",
+  "reconstructed": "/datasets/sample_05/reconstructed.png",
   "sar": "/datasets/sample_05/cloud_mask.png",
   "dem": "/datasets/sample_05/historical.png",
-  "temporal": [
+  "timeline": [
     {
-      "date": "Historical clear",
-      "img": "/datasets/sample_05/historical.png",
-      "clear": true
+      "date": "2022-01-26",
+      "clear": true,
+      "img": "/datasets/sample_05/historical.png"
     },
     {
-      "date": "Clear reference",
-      "img": "/datasets/sample_05/clear_reference.png",
-      "clear": true
+      "date": "2022-01-26",
+      "clear": false,
+      "img": "/datasets/sample_05/cloudy.png"
     },
     {
-      "date": "Current cloudy",
-      "img": "/datasets/sample_05/cloudy.png",
-      "clear": false
+      "date": "Analysis output",
+      "clear": true,
+      "img": "/datasets/sample_05/reconstructed.png"
     }
   ],
-  "geographic_info": {
-    "scene": "Western Ghats",
-    "coords": "11.4064N / 76.6932E",
-    "crs": "EPSG:4326",
-    "region": "Tamil Nadu / Kerala, India"
-  },
   "metadata": {
-    "scene": "Western Ghats",
-    "terrain": "forest",
-    "country": "India",
-    "coords": "11.4064N / 76.6932E",
-    "cloud_percentage": 47.2,
+    "id": "sample_05",
+    "name": "Rajasthan Thar Solar Complex",
+    "location": "Bhadla, Rajasthan Desert",
+    "coordinates": "27.5 N, 71.9 E",
+    "capture_date": "2022-01-26",
+    "historical_reference_date": "2022-01-26",
+    "sensor": "Landsat 8 OLI",
+    "resolution": "30 m Landsat natural-color composite",
+    "area": "Bhadla Solar Park and arid desert infrastructure",
+    "cloud_percentage": 51.8,
     "resolution_px": {
-      "width": 640,
-      "height": 384
+      "width": 1600,
+      "height": 1050
     },
-    "bands": [
-      "red",
-      "green",
-      "blue"
-    ],
-    "license": "Synthetic demo sample generated for TRINETRA-AI repository demos"
+    "source": "NASA Earth Observatory",
+    "source_url": "https://science.nasa.gov/earth/earth-observatory/soaking-up-sun-in-the-thar-desert-149442/",
+    "credit": "NASA Earth Observatory image by Lauren Dauphin, using Landsat data from USGS.",
+    "license": "NASA imagery; reusable with attribution unless otherwise noted by NASA."
   },
   "files": {
     "primary": "cloudy.png",
-    "clear": "clear_reference.png",
+    "thumbnail": "thumbnail.png",
+    "clear_reference": "clear_reference.png",
     "historical": "historical.png",
-    "mask": "cloud_mask.png"
+    "mask": "cloud_mask.png",
+    "confidence": "confidence_heatmap.png",
+    "difference": "difference_map.png",
+    "reconstructed": "reconstructed.png"
   }
 }

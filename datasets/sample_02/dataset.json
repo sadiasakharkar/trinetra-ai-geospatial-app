@@ -1,70 +1,73 @@
 {
-  "id": "TRI-SAMPLE-KRISHNA-BASIN",
-  "name": "Krishna Basin - Vijayawada Agriculture",
-  "sensor": "Synthetic LISS-IV style RGB composite",
-  "region": "Andhra Pradesh, India",
-  "acquired": "2026-05-21 11:08 IST",
-  "resolution": "5.8 m / pixel synthetic demo",
-  "area": "1,174 km2",
-  "cloudCover": 50.6,
-  "size": "0.09 MB",
-  "coords": "16.5062N / 80.6480E",
+  "id": "sample_02",
+  "name": "Krishna River Floodplain",
+  "sensor": "Terra MODIS",
+  "location": "Andhra Pradesh, Krishna River Basin",
+  "coords": "16.2 N, 80.8 E",
+  "resolution": "250-500 m MODIS false-color composite",
+  "captureDate": "2009-10-05",
+  "cloudCover": 38.3,
+  "status": "Ready",
+  "area": "Krishna River delta and flood channels",
   "preview_image_url": "/datasets/sample_02/cloudy.png",
   "thumbnail_url": "/datasets/sample_02/thumbnail.png",
   "cloud_mask_url": "/datasets/sample_02/cloud_mask.png",
   "clear_reference_url": "/datasets/sample_02/clear_reference.png",
   "historical_image_url": "/datasets/sample_02/historical.png",
-  "reconstructed_image_url": "/datasets/sample_02/clear_reference.png",
+  "reconstructed_image_url": "/datasets/sample_02/reconstructed.png",
+  "confidence_map_url": "/datasets/sample_02/confidence_heatmap.png",
+  "difference_map_url": "/datasets/sample_02/difference_map.png",
   "dataset_json_url": "/datasets/sample_02/dataset.json",
   "metadata_url": "/datasets/sample_02/metadata.json",
   "thumb": "/datasets/sample_02/thumbnail.png",
-  "reconstructed": "/datasets/sample_02/clear_reference.png",
+  "reconstructed": "/datasets/sample_02/reconstructed.png",
   "sar": "/datasets/sample_02/cloud_mask.png",
   "dem": "/datasets/sample_02/historical.png",
-  "temporal": [
+  "timeline": [
     {
-      "date": "Historical clear",
-      "img": "/datasets/sample_02/historical.png",
-      "clear": true
+      "date": "2009-09-10",
+      "clear": true,
+      "img": "/datasets/sample_02/historical.png"
     },
     {
-      "date": "Clear reference",
-      "img": "/datasets/sample_02/clear_reference.png",
-      "clear": true
+      "date": "2009-10-05",
+      "clear": false,
+      "img": "/datasets/sample_02/cloudy.png"
     },
     {
-      "date": "Current cloudy",
-      "img": "/datasets/sample_02/cloudy.png",
-      "clear": false
+      "date": "Analysis output",
+      "clear": true,
+      "img": "/datasets/sample_02/reconstructed.png"
     }
   ],
-  "geographic_info": {
-    "scene": "Krishna Basin",
-    "coords": "16.5062N / 80.6480E",
-    "crs": "EPSG:4326",
-    "region": "Andhra Pradesh, India"
-  },
   "metadata": {
-    "scene": "Krishna Basin",
-    "terrain": "agriculture",
-    "country": "India",
-    "coords": "16.5062N / 80.6480E",
-    "cloud_percentage": 50.6,
+    "id": "sample_02",
+    "name": "Krishna River Floodplain",
+    "location": "Andhra Pradesh, Krishna River Basin",
+    "coordinates": "16.2 N, 80.8 E",
+    "capture_date": "2009-10-05",
+    "historical_reference_date": "2009-09-10",
+    "sensor": "Terra MODIS",
+    "resolution": "250-500 m MODIS false-color composite",
+    "area": "Krishna River delta and flood channels",
+    "cloud_percentage": 38.3,
     "resolution_px": {
-      "width": 640,
-      "height": 384
+      "width": 1600,
+      "height": 1050
     },
-    "bands": [
-      "red",
-      "green",
-      "blue"
-    ],
-    "license": "Synthetic demo sample generated for TRINETRA-AI repository demos"
+    "source": "NASA Earth Observatory",
+    "source_url": "https://science.nasa.gov/earth/earth-observatory/flooding-along-the-krishna-river-40601/",
+    "credit": "NASA MODIS Rapid Response Team, Goddard Space Flight Center.",
+    "license": "NASA imagery; reusable with attribution unless otherwise noted by NASA."
   },
   "files": {
     "primary": "cloudy.png",
-    "clear": "clear_reference.png",
+    "thumbnail": "thumbnail.png",
+    "clear_reference": "clear_reference.png",
     "historical": "historical.png",
-    "mask": "cloud_mask.png"
+    "mask": "cloud_mask.png",
+    "confidence": "confidence_heatmap.png",
+    "difference": "difference_map.png",
+    "reconstructed": "reconstructed.png"
   }
 }

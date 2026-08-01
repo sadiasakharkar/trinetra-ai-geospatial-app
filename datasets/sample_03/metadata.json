@@ -1,17 +1,20 @@
 {
-  "scene": "Brahmaputra Floodplain",
-  "terrain": "floodplain",
-  "country": "India",
-  "coords": "26.1445N / 91.7362E",
-  "cloud_percentage": 43.7,
+  "id": "sample_03",
+  "name": "Brahmaputra Floodplain",
+  "location": "Assam, Northeast India",
+  "coordinates": "26.5 N, 92.8 E",
+  "capture_date": "2008-09-07",
+  "historical_reference_date": "2008-09-07",
+  "sensor": "Aqua MODIS",
+  "resolution": "500 m MODIS false-color composite",
+  "area": "Kaziranga-Brahmaputra braided floodplain",
+  "cloud_percentage": 32.1,
   "resolution_px": {
-    "width": 640,
-    "height": 384
+    "width": 1600,
+    "height": 1050
   },
-  "bands": [
-    "red",
-    "green",
-    "blue"
-  ],
-  "license": "Synthetic demo sample generated for TRINETRA-AI repository demos"
+  "source": "NASA Earth Observatory",
+  "source_url": "https://science.nasa.gov/earth/earth-observatory/the-brahmaputra-river-floods-northeast-india-20484/",
+  "credit": "NASA MODIS Rapid Response Team at NASA GSFC.",
+  "license": "NASA imagery; reusable with attribution unless otherwise noted by NASA."
 }

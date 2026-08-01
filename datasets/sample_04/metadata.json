@@ -1,17 +1,20 @@
 {
-  "scene": "Himalayan Region",
-  "terrain": "mountain",
-  "country": "India",
-  "coords": "31.1048N / 77.1734E",
-  "cloud_percentage": 34.5,
+  "id": "sample_04",
+  "name": "Himalayan Snow Corridor",
+  "location": "Central Himalaya and Tibetan Plateau",
+  "coordinates": "28.5 N, 86.9 E",
+  "capture_date": "2015-11-20",
+  "historical_reference_date": "2015-11-20",
+  "sensor": "Terra MODIS",
+  "resolution": "250-500 m MODIS natural-color composite",
+  "area": "Snow, haze, and high-relief Himalayan terrain",
+  "cloud_percentage": 11.8,
   "resolution_px": {
-    "width": 640,
-    "height": 384
+    "width": 1600,
+    "height": 1050
   },
-  "bands": [
-    "red",
-    "green",
-    "blue"
-  ],
-  "license": "Synthetic demo sample generated for TRINETRA-AI repository demos"
+  "source": "NASA Earth Observatory",
+  "source_url": "https://science.nasa.gov/earth/earth-observatory/snow-in-the-himalayas-87030/",
+  "credit": "NASA image by Jeff Schmaltz, LANCE/EOSDIS Rapid Response.",
+  "license": "NASA imagery; reusable with attribution unless otherwise noted by NASA."
 }

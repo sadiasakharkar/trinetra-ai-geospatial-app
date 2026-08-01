@@ -1,70 +1,73 @@
 {
-  "id": "TRI-SAMPLE-RAJASTHAN-DESERT",
-  "name": "Rajasthan Desert - Thar Dunes",
-  "sensor": "Synthetic LISS-IV style RGB composite",
-  "region": "Rajasthan, India",
-  "acquired": "2026-03-29 11:31 IST",
-  "resolution": "5.8 m / pixel synthetic demo",
-  "area": "1,722 km2",
-  "cloudCover": 27.1,
-  "size": "0.15 MB",
-  "coords": "26.9157N / 70.9083E",
+  "id": "sample_06",
+  "name": "Kerala Coast Flood Scene",
+  "sensor": "Sentinel-2 MSI / Landsat 8 OLI",
+  "location": "Kochi-Periyar lowlands, Kerala Coast",
+  "coords": "10.1 N, 76.3 E",
+  "resolution": "10-30 m false-color flood composite",
+  "captureDate": "2018-08-22",
+  "cloudCover": 25.3,
+  "status": "Ready",
+  "area": "Coastal wetlands, Western Ghats foothills, floodplain channels",
   "preview_image_url": "/datasets/sample_06/cloudy.png",
   "thumbnail_url": "/datasets/sample_06/thumbnail.png",
   "cloud_mask_url": "/datasets/sample_06/cloud_mask.png",
   "clear_reference_url": "/datasets/sample_06/clear_reference.png",
   "historical_image_url": "/datasets/sample_06/historical.png",
-  "reconstructed_image_url": "/datasets/sample_06/clear_reference.png",
+  "reconstructed_image_url": "/datasets/sample_06/reconstructed.png",
+  "confidence_map_url": "/datasets/sample_06/confidence_heatmap.png",
+  "difference_map_url": "/datasets/sample_06/difference_map.png",
   "dataset_json_url": "/datasets/sample_06/dataset.json",
   "metadata_url": "/datasets/sample_06/metadata.json",
   "thumb": "/datasets/sample_06/thumbnail.png",
-  "reconstructed": "/datasets/sample_06/clear_reference.png",
+  "reconstructed": "/datasets/sample_06/reconstructed.png",
   "sar": "/datasets/sample_06/cloud_mask.png",
   "dem": "/datasets/sample_06/historical.png",
-  "temporal": [
+  "timeline": [
     {
-      "date": "Historical clear",
-      "img": "/datasets/sample_06/historical.png",
-      "clear": true
+      "date": "2018-02-06",
+      "clear": true,
+      "img": "/datasets/sample_06/historical.png"
     },
     {
-      "date": "Clear reference",
-      "img": "/datasets/sample_06/clear_reference.png",
-      "clear": true
+      "date": "2018-08-22",
+      "clear": false,
+      "img": "/datasets/sample_06/cloudy.png"
     },
     {
-      "date": "Current cloudy",
-      "img": "/datasets/sample_06/cloudy.png",
-      "clear": false
+      "date": "Analysis output",
+      "clear": true,
+      "img": "/datasets/sample_06/reconstructed.png"
     }
   ],
-  "geographic_info": {
-    "scene": "Rajasthan Desert",
-    "coords": "26.9157N / 70.9083E",
-    "crs": "EPSG:4326",
-    "region": "Rajasthan, India"
-  },
   "metadata": {
-    "scene": "Rajasthan Desert",
-    "terrain": "desert",
-    "country": "India",
-    "coords": "26.9157N / 70.9083E",
-    "cloud_percentage": 27.1,
+    "id": "sample_06",
+    "name": "Kerala Coast Flood Scene",
+    "location": "Kochi-Periyar lowlands, Kerala Coast",
+    "coordinates": "10.1 N, 76.3 E",
+    "capture_date": "2018-08-22",
+    "historical_reference_date": "2018-02-06",
+    "sensor": "Sentinel-2 MSI / Landsat 8 OLI",
+    "resolution": "10-30 m false-color flood composite",
+    "area": "Coastal wetlands, Western Ghats foothills, floodplain channels",
+    "cloud_percentage": 25.3,
     "resolution_px": {
-      "width": 640,
-      "height": 384
+      "width": 1600,
+      "height": 1050
     },
-    "bands": [
-      "red",
-      "green",
-      "blue"
-    ],
-    "license": "Synthetic demo sample generated for TRINETRA-AI repository demos"
+    "source": "NASA Earth Observatory",
+    "source_url": "https://science.nasa.gov/earth/earth-observatory/before-and-after-the-kerala-floods-92669/",
+    "credit": "NASA Earth Observatory images by Lauren Dauphin, using Copernicus Sentinel and Landsat/USGS data.",
+    "license": "NASA imagery; reusable with attribution unless otherwise noted by NASA."
   },
   "files": {
     "primary": "cloudy.png",
-    "clear": "clear_reference.png",
+    "thumbnail": "thumbnail.png",
+    "clear_reference": "clear_reference.png",
     "historical": "historical.png",
-    "mask": "cloud_mask.png"
+    "mask": "cloud_mask.png",
+    "confidence": "confidence_heatmap.png",
+    "difference": "difference_map.png",
+    "reconstructed": "reconstructed.png"
   }
 }

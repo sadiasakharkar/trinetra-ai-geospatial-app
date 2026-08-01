@@ -1,17 +1,20 @@
 {
-  "scene": "Rajasthan Desert",
-  "terrain": "desert",
-  "country": "India",
-  "coords": "26.9157N / 70.9083E",
-  "cloud_percentage": 27.1,
+  "id": "sample_06",
+  "name": "Kerala Coast Flood Scene",
+  "location": "Kochi-Periyar lowlands, Kerala Coast",
+  "coordinates": "10.1 N, 76.3 E",
+  "capture_date": "2018-08-22",
+  "historical_reference_date": "2018-02-06",
+  "sensor": "Sentinel-2 MSI / Landsat 8 OLI",
+  "resolution": "10-30 m false-color flood composite",
+  "area": "Coastal wetlands, Western Ghats foothills, floodplain channels",
+  "cloud_percentage": 25.3,
   "resolution_px": {
-    "width": 640,
-    "height": 384
+    "width": 1600,
+    "height": 1050
   },
-  "bands": [
-    "red",
-    "green",
-    "blue"
-  ],
-  "license": "Synthetic demo sample generated for TRINETRA-AI repository demos"
+  "source": "NASA Earth Observatory",
+  "source_url": "https://science.nasa.gov/earth/earth-observatory/before-and-after-the-kerala-floods-92669/",
+  "credit": "NASA Earth Observatory images by Lauren Dauphin, using Copernicus Sentinel and Landsat/USGS data.",
+  "license": "NASA imagery; reusable with attribution unless otherwise noted by NASA."
 }

@@ -1,70 +1,73 @@
 {
-  "id": "TRI-SAMPLE-BRAHMAPUTRA-FLOODPLAIN",
-  "name": "Brahmaputra Floodplain - Guwahati",
-  "sensor": "Synthetic LISS-IV style RGB composite",
-  "region": "Assam, India",
-  "acquired": "2026-04-07 09:55 IST",
-  "resolution": "5.8 m / pixel synthetic demo",
-  "area": "1,311 km2",
-  "cloudCover": 43.7,
-  "size": "0.11 MB",
-  "coords": "26.1445N / 91.7362E",
+  "id": "sample_03",
+  "name": "Brahmaputra Floodplain",
+  "sensor": "Aqua MODIS",
+  "location": "Assam, Northeast India",
+  "coords": "26.5 N, 92.8 E",
+  "resolution": "500 m MODIS false-color composite",
+  "captureDate": "2008-09-07",
+  "cloudCover": 32.1,
+  "status": "Ready",
+  "area": "Kaziranga-Brahmaputra braided floodplain",
   "preview_image_url": "/datasets/sample_03/cloudy.png",
   "thumbnail_url": "/datasets/sample_03/thumbnail.png",
   "cloud_mask_url": "/datasets/sample_03/cloud_mask.png",
   "clear_reference_url": "/datasets/sample_03/clear_reference.png",
   "historical_image_url": "/datasets/sample_03/historical.png",
-  "reconstructed_image_url": "/datasets/sample_03/clear_reference.png",
+  "reconstructed_image_url": "/datasets/sample_03/reconstructed.png",
+  "confidence_map_url": "/datasets/sample_03/confidence_heatmap.png",
+  "difference_map_url": "/datasets/sample_03/difference_map.png",
   "dataset_json_url": "/datasets/sample_03/dataset.json",
   "metadata_url": "/datasets/sample_03/metadata.json",
   "thumb": "/datasets/sample_03/thumbnail.png",
-  "reconstructed": "/datasets/sample_03/clear_reference.png",
+  "reconstructed": "/datasets/sample_03/reconstructed.png",
   "sar": "/datasets/sample_03/cloud_mask.png",
   "dem": "/datasets/sample_03/historical.png",
-  "temporal": [
+  "timeline": [
     {
-      "date": "Historical clear",
-      "img": "/datasets/sample_03/historical.png",
-      "clear": true
+      "date": "2008-09-07",
+      "clear": true,
+      "img": "/datasets/sample_03/historical.png"
     },
     {
-      "date": "Clear reference",
-      "img": "/datasets/sample_03/clear_reference.png",
-      "clear": true
+      "date": "2008-09-07",
+      "clear": false,
+      "img": "/datasets/sample_03/cloudy.png"
     },
     {
-      "date": "Current cloudy",
-      "img": "/datasets/sample_03/cloudy.png",
-      "clear": false
+      "date": "Analysis output",
+      "clear": true,
+      "img": "/datasets/sample_03/reconstructed.png"
     }
   ],
-  "geographic_info": {
-    "scene": "Brahmaputra Floodplain",
-    "coords": "26.1445N / 91.7362E",
-    "crs": "EPSG:4326",
-    "region": "Assam, India"
-  },
   "metadata": {
-    "scene": "Brahmaputra Floodplain",
-    "terrain": "floodplain",
-    "country": "India",
-    "coords": "26.1445N / 91.7362E",
-    "cloud_percentage": 43.7,
+    "id": "sample_03",
+    "name": "Brahmaputra Floodplain",
+    "location": "Assam, Northeast India",
+    "coordinates": "26.5 N, 92.8 E",
+    "capture_date": "2008-09-07",
+    "historical_reference_date": "2008-09-07",
+    "sensor": "Aqua MODIS",
+    "resolution": "500 m MODIS false-color composite",
+    "area": "Kaziranga-Brahmaputra braided floodplain",
+    "cloud_percentage": 32.1,
     "resolution_px": {
-      "width": 640,
-      "height": 384
+      "width": 1600,
+      "height": 1050
     },
-    "bands": [
-      "red",
-      "green",
-      "blue"
-    ],
-    "license": "Synthetic demo sample generated for TRINETRA-AI repository demos"
+    "source": "NASA Earth Observatory",
+    "source_url": "https://science.nasa.gov/earth/earth-observatory/the-brahmaputra-river-floods-northeast-india-20484/",
+    "credit": "NASA MODIS Rapid Response Team at NASA GSFC.",
+    "license": "NASA imagery; reusable with attribution unless otherwise noted by NASA."
   },
   "files": {
     "primary": "cloudy.png",
-    "clear": "clear_reference.png",
+    "thumbnail": "thumbnail.png",
+    "clear_reference": "clear_reference.png",
     "historical": "historical.png",
-    "mask": "cloud_mask.png"
+    "mask": "cloud_mask.png",
+    "confidence": "confidence_heatmap.png",
+    "difference": "difference_map.png",
+    "reconstructed": "reconstructed.png"
   }
 }

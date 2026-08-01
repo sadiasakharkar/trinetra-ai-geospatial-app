@@ -1,17 +1,20 @@
 {
-  "scene": "Krishna Basin",
-  "terrain": "agriculture",
-  "country": "India",
-  "coords": "16.5062N / 80.6480E",
-  "cloud_percentage": 50.6,
+  "id": "sample_02",
+  "name": "Krishna River Floodplain",
+  "location": "Andhra Pradesh, Krishna River Basin",
+  "coordinates": "16.2 N, 80.8 E",
+  "capture_date": "2009-10-05",
+  "historical_reference_date": "2009-09-10",
+  "sensor": "Terra MODIS",
+  "resolution": "250-500 m MODIS false-color composite",
+  "area": "Krishna River delta and flood channels",
+  "cloud_percentage": 38.3,
   "resolution_px": {
-    "width": 640,
-    "height": 384
+    "width": 1600,
+    "height": 1050
   },
-  "bands": [
-    "red",
-    "green",
-    "blue"
-  ],
-  "license": "Synthetic demo sample generated for TRINETRA-AI repository demos"
+  "source": "NASA Earth Observatory",
+  "source_url": "https://science.nasa.gov/earth/earth-observatory/flooding-along-the-krishna-river-40601/",
+  "credit": "NASA MODIS Rapid Response Team, Goddard Space Flight Center.",
+  "license": "NASA imagery; reusable with attribution unless otherwise noted by NASA."
 }

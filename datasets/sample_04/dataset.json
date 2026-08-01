@@ -1,70 +1,73 @@
 {
-  "id": "TRI-SAMPLE-HIMALAYAN-REGION",
-  "name": "Himalayan Region - Himachal Snowline",
-  "sensor": "Synthetic LISS-IV style RGB composite",
-  "region": "Himachal Pradesh, India",
-  "acquired": "2026-02-14 10:18 IST",
-  "resolution": "5.8 m / pixel synthetic demo",
-  "area": "1,448 km2",
-  "cloudCover": 34.5,
-  "size": "0.14 MB",
-  "coords": "31.1048N / 77.1734E",
+  "id": "sample_04",
+  "name": "Himalayan Snow Corridor",
+  "sensor": "Terra MODIS",
+  "location": "Central Himalaya and Tibetan Plateau",
+  "coords": "28.5 N, 86.9 E",
+  "resolution": "250-500 m MODIS natural-color composite",
+  "captureDate": "2015-11-20",
+  "cloudCover": 11.8,
+  "status": "Ready",
+  "area": "Snow, haze, and high-relief Himalayan terrain",
   "preview_image_url": "/datasets/sample_04/cloudy.png",
   "thumbnail_url": "/datasets/sample_04/thumbnail.png",
   "cloud_mask_url": "/datasets/sample_04/cloud_mask.png",
   "clear_reference_url": "/datasets/sample_04/clear_reference.png",
   "historical_image_url": "/datasets/sample_04/historical.png",
-  "reconstructed_image_url": "/datasets/sample_04/clear_reference.png",
+  "reconstructed_image_url": "/datasets/sample_04/reconstructed.png",
+  "confidence_map_url": "/datasets/sample_04/confidence_heatmap.png",
+  "difference_map_url": "/datasets/sample_04/difference_map.png",
   "dataset_json_url": "/datasets/sample_04/dataset.json",
   "metadata_url": "/datasets/sample_04/metadata.json",
   "thumb": "/datasets/sample_04/thumbnail.png",
-  "reconstructed": "/datasets/sample_04/clear_reference.png",
+  "reconstructed": "/datasets/sample_04/reconstructed.png",
   "sar": "/datasets/sample_04/cloud_mask.png",
   "dem": "/datasets/sample_04/historical.png",
-  "temporal": [
+  "timeline": [
     {
-      "date": "Historical clear",
-      "img": "/datasets/sample_04/historical.png",
-      "clear": true
+      "date": "2015-11-20",
+      "clear": true,
+      "img": "/datasets/sample_04/historical.png"
     },
     {
-      "date": "Clear reference",
-      "img": "/datasets/sample_04/clear_reference.png",
-      "clear": true
+      "date": "2015-11-20",
+      "clear": false,
+      "img": "/datasets/sample_04/cloudy.png"
     },
     {
-      "date": "Current cloudy",
-      "img": "/datasets/sample_04/cloudy.png",
-      "clear": false
+      "date": "Analysis output",
+      "clear": true,
+      "img": "/datasets/sample_04/reconstructed.png"
     }
   ],
-  "geographic_info": {
-    "scene": "Himalayan Region",
-    "coords": "31.1048N / 77.1734E",
-    "crs": "EPSG:4326",
-    "region": "Himachal Pradesh, India"
-  },
   "metadata": {
-    "scene": "Himalayan Region",
-    "terrain": "mountain",
-    "country": "India",
-    "coords": "31.1048N / 77.1734E",
-    "cloud_percentage": 34.5,
+    "id": "sample_04",
+    "name": "Himalayan Snow Corridor",
+    "location": "Central Himalaya and Tibetan Plateau",
+    "coordinates": "28.5 N, 86.9 E",
+    "capture_date": "2015-11-20",
+    "historical_reference_date": "2015-11-20",
+    "sensor": "Terra MODIS",
+    "resolution": "250-500 m MODIS natural-color composite",
+    "area": "Snow, haze, and high-relief Himalayan terrain",
+    "cloud_percentage": 11.8,
     "resolution_px": {
-      "width": 640,
-      "height": 384
+      "width": 1600,
+      "height": 1050
     },
-    "bands": [
-      "red",
-      "green",
-      "blue"
-    ],
-    "license": "Synthetic demo sample generated for TRINETRA-AI repository demos"
+    "source": "NASA Earth Observatory",
+    "source_url": "https://science.nasa.gov/earth/earth-observatory/snow-in-the-himalayas-87030/",
+    "credit": "NASA image by Jeff Schmaltz, LANCE/EOSDIS Rapid Response.",
+    "license": "NASA imagery; reusable with attribution unless otherwise noted by NASA."
   },
   "files": {
     "primary": "cloudy.png",
-    "clear": "clear_reference.png",
+    "thumbnail": "thumbnail.png",
+    "clear_reference": "clear_reference.png",
     "historical": "historical.png",
-    "mask": "cloud_mask.png"
+    "mask": "cloud_mask.png",
+    "confidence": "confidence_heatmap.png",
+    "difference": "difference_map.png",
+    "reconstructed": "reconstructed.png"
   }
 }
