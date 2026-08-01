@@ -18,6 +18,9 @@ def _with_legacy_fields(dataset: dict[str, Any]) -> dict[str, Any]:
     dataset["reconstructed"] = dataset.get("reconstructed") or reconstructed
     dataset["sar"] = dataset.get("sar") or cloud_mask or preview
     dataset["dem"] = dataset.get("dem") or historical
+    dataset["region"] = dataset.get("region") or dataset.get("location") or "Remote sensing scene"
+    dataset["acquired"] = dataset.get("acquired") or dataset.get("captureDate") or "Unknown acquisition"
+    dataset["size"] = dataset.get("size") or "Bundled scene"
     dataset["temporal"] = dataset.get("temporal") or [
         {"date": "Historical", "img": historical, "clear": True},
         {"date": "Current", "img": preview, "clear": False},
