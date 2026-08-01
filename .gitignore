@@ -8,8 +8,25 @@ __v0_jsx-dev-runtime.ts
 
 # Environment variables
 .env*.local
+.env
 
 # Common ignores
 node_modules
 .next/
 .DS_Store
+*.tsbuildinfo
+
+# Python/generated artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local runtime artifacts
+.cache/
+public/uploads/
