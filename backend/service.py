@@ -17,7 +17,7 @@ try:
 except ImportError:  # pragma: no cover
     Image = None
 
-from backend.config import BUNDLED_WEIGHTS_DIR, Settings
+from backend.config import DEFAULT_BUNDLED_SPAGAN_ONNX, Settings, resolve_spagan_onnx_path
 from backend.datasets import dataset_path_from_url, find_dataset, load_sample_datasets, load_uploaded_datasets
 from backend.logging_utils import get_logger
 from backend.media import public_url, save_gray, save_rgb, save_thumbnail
@@ -78,7 +78,12 @@ class TrinetraService:
                 )
                 self._pipeline = CloudRemovalPipeline(self.settings, self._engine)
                 self._load_error = None
-                self.logger.info("Inference runtime initialized with engine=%s", self._engine.info.name)
+                self.logger.info(
+                    "Inference runtime initialized with engine=%s model=%s spagan_onnx=%s",
+                    self._engine.info.name,
+                    self._engine.info.model,
+                    spagan_path,
+                )
             except Exception as exc:
                 self._load_error = str(exc)
                 self.logger.exception("Failed to initialize runtime")
@@ -86,15 +91,12 @@ class TrinetraService:
 
     def _resolve_spagan_weights(self) -> Path | None:
         downloaded = self.weight_manager.ensure(self.settings.spagan_onnx_name)
-        if downloaded is not None:
-            return downloaded
-        cached = self.settings.weights_dir / self.settings.spagan_onnx_name
-        if cached.exists():
-            return cached
-        bundled = BUNDLED_WEIGHTS_DIR / self.settings.spagan_onnx_name
-        if bundled.exists():
-            return bundled
-        return None
+        return resolve_spagan_onnx_path(
+            env_path=self.settings.spagan_onnx_path,
+            weights_dir=self.settings.weights_dir,
+            spagan_onnx_name=self.settings.spagan_onnx_name,
+            downloaded=downloaded,
+        )
 
     def check_runtime(self) -> str | None:
         try:

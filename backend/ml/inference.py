@@ -5,6 +5,8 @@ from pathlib import Path
 
 import numpy as np
 
+from backend.config import DEFAULT_BUNDLED_SPAGAN_ONNX
+
 try:
     import onnxruntime as ort
 except ImportError:  # pragma: no cover
@@ -95,9 +97,12 @@ class InferenceEngine:
                 model="AttentionResidualUNet",
             )
             return
+        spagan_hint = self._spagan_onnx_path or DEFAULT_BUNDLED_SPAGAN_ONNX
+        bundled_status = "found" if DEFAULT_BUNDLED_SPAGAN_ONNX.is_file() else "missing"
         raise InferenceUnavailableError(
             "No pretrained cloud-removal weights found. Expected SpA-GAN ONNX at "
-            f"{self._spagan_onnx_path} or AttentionResidualUNet weights."
+            f"{spagan_hint} (bundled default {bundled_status} at {DEFAULT_BUNDLED_SPAGAN_ONNX}) "
+            "or AttentionResidualUNet weights."
         )
 
     def predict(self, batch: np.ndarray) -> dict[str, np.ndarray]:

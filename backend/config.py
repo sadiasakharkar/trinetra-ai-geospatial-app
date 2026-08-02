@@ -6,7 +6,35 @@ from pathlib import Path
 
 # Bundled SpA-GAN RICE1 ONNX (exported from Penn000/SpA-GAN_for_cloud_removal weights).
 DEFAULT_SPAGAN_ONNX_SHA256 = "5e8b662c72064318e92c9f2ace817cbb68821515dcca3b8083ece6c0d78ee015"
-BUNDLED_WEIGHTS_DIR = Path(__file__).resolve().parent / "ml" / "weights"
+BACKEND_ROOT = Path(__file__).resolve().parent
+BUNDLED_WEIGHTS_DIR = BACKEND_ROOT / "ml" / "weights"
+DEFAULT_BUNDLED_SPAGAN_ONNX = BUNDLED_WEIGHTS_DIR / "spagan_rice1.onnx"
+
+
+def _optional_path(value: str | None) -> Path | None:
+    if not value or not value.strip():
+        return None
+    return Path(value.strip()).expanduser()
+
+
+def resolve_spagan_onnx_path(
+    *,
+    env_path: Path | None,
+    weights_dir: Path,
+    spagan_onnx_name: str,
+    downloaded: Path | None,
+) -> Path | None:
+    """Resolve SpA-GAN ONNX weights: env override, cache/download, then bundled default."""
+    candidates: tuple[Path, ...] = (
+        *(path for path in (env_path, downloaded) if path is not None),
+        weights_dir / spagan_onnx_name,
+        DEFAULT_BUNDLED_SPAGAN_ONNX,
+    )
+    for candidate in candidates:
+        resolved = candidate.resolve()
+        if resolved.is_file():
+            return resolved
+    return None
 
 
 @dataclass(slots=True)
@@ -29,6 +57,9 @@ class Settings:
     attention_onnx_url: str | None = field(default_factory=lambda: os.getenv("TRINETRA_ATTENTION_ONNX_URL"))
     attention_onnx_sha256: str | None = field(default_factory=lambda: os.getenv("TRINETRA_ATTENTION_ONNX_SHA256"))
     spagan_onnx_name: str = field(default_factory=lambda: os.getenv("TRINETRA_SPAGAN_ONNX_NAME", "spagan_rice1.onnx"))
+    spagan_onnx_path: Path | None = field(
+        default_factory=lambda: _optional_path(os.getenv("TRINETRA_SPAGAN_ONNX_PATH"))
+    )
     torchscript_name: str = field(default_factory=lambda: os.getenv("TRINETRA_TORCHSCRIPT_NAME", "attention_resunet.ts"))
     onnx_name: str = field(default_factory=lambda: os.getenv("TRINETRA_ONNX_NAME", "attention_resunet.onnx"))
     max_patch_size: int = field(default_factory=lambda: int(os.getenv("TRINETRA_MAX_PATCH", "512")))
