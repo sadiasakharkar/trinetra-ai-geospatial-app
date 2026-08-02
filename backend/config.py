@@ -14,7 +14,7 @@ DEFAULT_BUNDLED_SPAGAN_ONNX = BUNDLED_WEIGHTS_DIR / "spagan_rice1.onnx"
 def _optional_path(value: str | None) -> Path | None:
     if not value or not value.strip():
         return None
-    return Path(value.strip()).expanduser()
+    return Path(value.strip()).expanduser().resolve()
 
 
 def resolve_spagan_onnx_path(
@@ -24,16 +24,20 @@ def resolve_spagan_onnx_path(
     spagan_onnx_name: str,
     downloaded: Path | None,
 ) -> Path | None:
-    """Resolve SpA-GAN ONNX weights: env override, cache/download, then bundled default."""
-    candidates: tuple[Path, ...] = (
-        *(path for path in (env_path, downloaded) if path is not None),
-        weights_dir / spagan_onnx_name,
-        DEFAULT_BUNDLED_SPAGAN_ONNX,
+    """Resolve SpA-GAN ONNX weights with explicit fallback order."""
+    candidates: tuple[Path, ...] = tuple(
+        candidate.resolve()
+        for candidate in (
+            env_path,
+            downloaded,
+            weights_dir / spagan_onnx_name,
+            DEFAULT_BUNDLED_SPAGAN_ONNX,
+        )
+        if candidate is not None
     )
     for candidate in candidates:
-        resolved = candidate.resolve()
-        if resolved.is_file():
-            return resolved
+        if candidate.exists() and candidate.is_file():
+            return candidate.resolve()
     return None
 
 

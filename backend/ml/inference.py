@@ -54,9 +54,13 @@ class InferenceEngine:
         return self._engine_info
 
     def _load(self) -> None:
+        spagan_path = self._spagan_onnx_path.resolve() if self._spagan_onnx_path is not None else None
+        torchscript_path = self._torchscript_path.resolve() if self._torchscript_path is not None else None
+        onnx_path = self._onnx_path.resolve() if self._onnx_path is not None else None
         if ort is not None and self._spagan_onnx_path and self._spagan_onnx_path.exists():
+            print(f"Loaded bundled SpA-GAN model: {spagan_path}")
             self._onnx_session = ort.InferenceSession(
-                self._spagan_onnx_path.as_posix(),
+                spagan_path.as_posix(),
                 providers=["CPUExecutionProvider"],
             )
             self._backend = "spagan"
@@ -68,9 +72,10 @@ class InferenceEngine:
             )
             return
         if ort is not None and self._onnx_path and self._onnx_path.exists():
+            print(f"Loaded AttentionResidualUNet ONNX model: {onnx_path}")
             providers = ort.get_available_providers()
             self._onnx_session = ort.InferenceSession(
-                self._onnx_path.as_posix(),
+                onnx_path.as_posix(),
                 providers=["CUDAExecutionProvider", "CPUExecutionProvider"]
                 if "CUDAExecutionProvider" in providers
                 else ["CPUExecutionProvider"],
@@ -85,8 +90,9 @@ class InferenceEngine:
             )
             return
         if torch is not None and self._torchscript_path and self._torchscript_path.exists():
+            print(f"Loaded AttentionResidualUNet torchscript model: {torchscript_path}")
             self._device = "cuda" if torch.cuda.is_available() else "cpu"
-            self._torch_model = torch.jit.load(self._torchscript_path.as_posix(), map_location=self._device)
+            self._torch_model = torch.jit.load(torchscript_path.as_posix(), map_location=self._device)
             self._torch_model.eval()
             precision = "fp16" if self._device == "cuda" else "fp32"
             self._backend = "attention_resunet"
@@ -97,7 +103,7 @@ class InferenceEngine:
                 model="AttentionResidualUNet",
             )
             return
-        spagan_hint = self._spagan_onnx_path or DEFAULT_BUNDLED_SPAGAN_ONNX
+        spagan_hint = spagan_path or DEFAULT_BUNDLED_SPAGAN_ONNX.resolve()
         bundled_status = "found" if DEFAULT_BUNDLED_SPAGAN_ONNX.is_file() else "missing"
         raise InferenceUnavailableError(
             "No pretrained cloud-removal weights found. Expected SpA-GAN ONNX at "

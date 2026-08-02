@@ -75,7 +75,10 @@ def test_resolve_spagan_onnx_path_uses_env_override(tmp_path: Path) -> None:
 
 
 @pytest.mark.skipif(not BUNDLED_ONNX.exists(), reason="Bundled SpA-GAN ONNX weights are unavailable.")
-def test_service_resolves_bundled_spagan_weights() -> None:
+def test_service_resolves_bundled_spagan_weights(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("TRINETRA_MODEL_URL", raising=False)
+    monkeypatch.delenv("TRINETRA_MODEL_SHA256", raising=False)
+    monkeypatch.delenv("TRINETRA_SPAGAN_ONNX_PATH", raising=False)
     from backend.config import get_settings
     from backend.service import TrinetraService
 

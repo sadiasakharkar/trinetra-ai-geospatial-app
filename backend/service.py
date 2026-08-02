@@ -68,9 +68,19 @@ class TrinetraService:
             if self._engine is not None and self._pipeline is not None:
                 return
             try:
+                self.logger.info("TRINETRA_MODEL_URL = %s", self.settings.model_url)
+                self.logger.info("TRINETRA_SPAGAN_ONNX_PATH = %s", self.settings.spagan_onnx_path)
                 spagan_path = self._resolve_spagan_weights()
+                self.logger.info("Resolved model path = %s", spagan_path)
+                self.logger.info(
+                    "Resolved model exists=%s is_file=%s",
+                    spagan_path.exists() if spagan_path else False,
+                    spagan_path.is_file() if spagan_path else False,
+                )
                 torchscript_path = self.weight_manager.ensure(self.settings.torchscript_name)
                 onnx_path = self.weight_manager.ensure(self.settings.onnx_name)
+                self.logger.info("Cached downloaded torchscript path = %s", torchscript_path)
+                self.logger.info("Cached downloaded onnx path = %s", onnx_path)
                 self._engine = InferenceEngine(
                     spagan_onnx_path=spagan_path,
                     torchscript_path=torchscript_path,
@@ -91,12 +101,28 @@ class TrinetraService:
 
     def _resolve_spagan_weights(self) -> Path | None:
         downloaded = self.weight_manager.ensure(self.settings.spagan_onnx_name)
-        return resolve_spagan_onnx_path(
+        bundled = DEFAULT_BUNDLED_SPAGAN_ONNX.resolve()
+        self.logger.info("Bundled model path = %s", bundled)
+        self.logger.info(
+            "Bundled model exists=%s is_file=%s",
+            bundled.exists(),
+            bundled.is_file(),
+        )
+        self.logger.info("Cached downloaded model path = %s", downloaded)
+        self.logger.info(
+            "Cached downloaded model exists=%s is_file=%s",
+            downloaded.exists() if downloaded else False,
+            downloaded.is_file() if downloaded else False,
+        )
+        resolved = resolve_spagan_onnx_path(
             env_path=self.settings.spagan_onnx_path,
             weights_dir=self.settings.weights_dir,
             spagan_onnx_name=self.settings.spagan_onnx_name,
             downloaded=downloaded,
         )
+        if resolved is None and bundled.exists() and bundled.is_file():
+            return bundled
+        return resolved
 
     def check_runtime(self) -> str | None:
         try:
