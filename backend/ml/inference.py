@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 
 from backend.config import DEFAULT_BUNDLED_SPAGAN_ONNX
+from backend.logging_utils import get_logger
 
 try:
     import onnxruntime as ort
@@ -39,6 +40,7 @@ class InferenceEngine:
         torchscript_path: Path | None,
         onnx_path: Path | None,
     ) -> None:
+        self.logger = get_logger(__name__)
         self._spagan_onnx_path = spagan_onnx_path
         self._torchscript_path = torchscript_path
         self._onnx_path = onnx_path
@@ -58,7 +60,7 @@ class InferenceEngine:
         torchscript_path = self._torchscript_path.resolve() if self._torchscript_path is not None else None
         onnx_path = self._onnx_path.resolve() if self._onnx_path is not None else None
         if ort is not None and self._spagan_onnx_path and self._spagan_onnx_path.exists():
-            print(f"Loaded bundled SpA-GAN model: {spagan_path}")
+            self.logger.info("Loaded bundled SpA-GAN model: %s", spagan_path)
             self._onnx_session = ort.InferenceSession(
                 spagan_path.as_posix(),
                 providers=["CPUExecutionProvider"],
@@ -72,7 +74,7 @@ class InferenceEngine:
             )
             return
         if ort is not None and self._onnx_path and self._onnx_path.exists():
-            print(f"Loaded AttentionResidualUNet ONNX model: {onnx_path}")
+            self.logger.info("Loaded AttentionResidualUNet ONNX model: %s", onnx_path)
             providers = ort.get_available_providers()
             self._onnx_session = ort.InferenceSession(
                 onnx_path.as_posix(),
@@ -90,7 +92,7 @@ class InferenceEngine:
             )
             return
         if torch is not None and self._torchscript_path and self._torchscript_path.exists():
-            print(f"Loaded AttentionResidualUNet torchscript model: {torchscript_path}")
+            self.logger.info("Loaded AttentionResidualUNet torchscript model: %s", torchscript_path)
             self._device = "cuda" if torch.cuda.is_available() else "cpu"
             self._torch_model = torch.jit.load(torchscript_path.as_posix(), map_location=self._device)
             self._torch_model.eval()
