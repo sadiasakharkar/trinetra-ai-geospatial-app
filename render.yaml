@@ -9,6 +9,6 @@ services:
       - key: TRINETRA_MODEL_URL
         sync: false
       - key: TRINETRA_MODEL_SHA256
-        sync: false
+        value: 5e8b662c72064318e92c9f2ace817cbb68821515dcca3b8083ece6c0d78ee015
       - key: TRINETRA_LOG_LEVEL
         value: INFO

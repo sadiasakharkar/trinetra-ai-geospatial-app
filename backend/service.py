@@ -17,7 +17,7 @@ try:
 except ImportError:  # pragma: no cover
     Image = None
 
-from backend.config import Settings
+from backend.config import BUNDLED_WEIGHTS_DIR, Settings
 from backend.datasets import dataset_path_from_url, find_dataset, load_sample_datasets, load_uploaded_datasets
 from backend.logging_utils import get_logger
 from backend.media import public_url, save_gray, save_rgb, save_thumbnail
@@ -68,11 +68,7 @@ class TrinetraService:
             if self._engine is not None and self._pipeline is not None:
                 return
             try:
-                spagan_path = self.weight_manager.ensure(self.settings.spagan_onnx_name)
-                if spagan_path is None:
-                    bundled = self.settings.weights_dir / self.settings.spagan_onnx_name
-                    if bundled.exists():
-                        spagan_path = bundled
+                spagan_path = self._resolve_spagan_weights()
                 torchscript_path = self.weight_manager.ensure(self.settings.torchscript_name)
                 onnx_path = self.weight_manager.ensure(self.settings.onnx_name)
                 self._engine = InferenceEngine(
@@ -87,6 +83,18 @@ class TrinetraService:
                 self._load_error = str(exc)
                 self.logger.exception("Failed to initialize runtime")
                 raise
+
+    def _resolve_spagan_weights(self) -> Path | None:
+        downloaded = self.weight_manager.ensure(self.settings.spagan_onnx_name)
+        if downloaded is not None:
+            return downloaded
+        cached = self.settings.weights_dir / self.settings.spagan_onnx_name
+        if cached.exists():
+            return cached
+        bundled = BUNDLED_WEIGHTS_DIR / self.settings.spagan_onnx_name
+        if bundled.exists():
+            return bundled
+        return None
 
     def check_runtime(self) -> str | None:
         try:

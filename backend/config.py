@@ -5,7 +5,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 # Bundled SpA-GAN RICE1 ONNX (exported from Penn000/SpA-GAN_for_cloud_removal weights).
-DEFAULT_SPAGAN_ONNX_SHA256 = ""
+DEFAULT_SPAGAN_ONNX_SHA256 = "5e8b662c72064318e92c9f2ace817cbb68821515dcca3b8083ece6c0d78ee015"
+BUNDLED_WEIGHTS_DIR = Path(__file__).resolve().parent / "ml" / "weights"
 
 
 @dataclass(slots=True)

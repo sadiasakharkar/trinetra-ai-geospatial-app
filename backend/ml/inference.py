@@ -125,7 +125,10 @@ class InferenceEngine:
 
     def _predict_spagan(self, batch: np.ndarray) -> dict[str, np.ndarray]:
         rgb = np.clip(batch[:, :3], 0.0, 1.0).astype(np.float32)
-        reconstruction, attention = self._onnx_session.run(None, {"rgb": rgb})
+        # RICE1 weights were trained on OpenCV BGR channel order.
+        model_input = rgb[:, [2, 1, 0], :, :]
+        reconstruction, attention = self._onnx_session.run(None, {"rgb": model_input})
+        reconstruction = reconstruction[:, [2, 1, 0], :, :]
         reconstruction = np.clip(reconstruction, 0.0, 1.0).astype(np.float32)
         cloud = np.clip(attention, 0.0, 1.0).astype(np.float32)
         confidence = np.clip(1.0 - cloud * 0.75, 0.0, 1.0).astype(np.float32)
